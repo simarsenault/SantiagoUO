@@ -1,0 +1,10 @@
+set %itemId UXUXJMD
+
+loop:
+set #lTargetId %itemId
+set #lTargetKind 1
+event macro 13 3
+target
+event macro 22
+wait 70
+goto loop
