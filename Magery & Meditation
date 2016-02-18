@@ -1,0 +1,58 @@
+set %container OHOAKMD
+set %meditateMana 99
+
+loop:
+findItem WZF C_ , #backPackId
+if ( #findKind = -1 )
+    gosub grabReagents
+if ( #mana < %meditateMana )
+    gosub meditate
+event macro 15 19
+target
+event macro 23
+wait 40
+goto loop
+
+sub meditate
+_meditate:
+if ( #mana >= 100 )
+    return
+event macro 13 46
+set %_journal #jIndex
+_meditationJournal:
+if ( #jIndex <= %_journal )
+    goto _meditationJournal
+set %_journal %_journal + 1
+scanJournal %_journal
+if you_are_at_peace in #journal
+    return
+if you_lose_your_concentration in #journal
+    goto _meditate
+if ( #mana >= 100 )
+    return
+goto _meditationJournal
+
+sub grabReagents
+gosub openContainer %container
+findItem WZF C_ , %container
+if ( #findKind = -1 )
+    halt
+exevent drag #findId 10
+wait 5
+exevent dropC #backPackId
+wait 5
+return
+
+; gosub openContainer [containerId]
+sub openContainer
+set %_containerId %1
+_openContainer:
+set #lObjectId %_containerId
+event macro 17
+set %_timeout #scnt + 10
+_waitOpenContainer:
+if ( %_timeout < #scnt )
+    goto _openContainer
+if ( #contId = %_containerId )
+   return
+goto _openContainer
