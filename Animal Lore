@@ -1,0 +1,10 @@
+set %animalId VGEJ
+
+loop:
+set #lTargetId %animalId
+set #lTargetKind 1
+event macro 13 2
+target
+event macro 22
+wait 120
+goto loop
