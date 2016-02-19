@@ -19,7 +19,7 @@ set %nodeMaximumTries 3          ; Maximum failed attempts per mining node befor
 ; Constants
 set %tinkeringTools GTL
 set %ironRequiredMiningTool 8
-set %miningTools NPF
+set %miningTools NPF_QPF
 set %forge JBG
 set %oresStacks DWJ_EWJ_GWJ
 set %oresOne TVJ
@@ -28,6 +28,8 @@ set %ironIngots RMK
 set %ingots %ironIngots , _NMK_XMK_TMK
 set %oresIngots %ores , _ , %ingots
 set %recallScrolls WTL
+set %pathFindMineSpotTolerance 0
+set %pathFindForgeTolerance 1
 
 ; Stats
 set %ironCollected 0
@@ -42,7 +44,6 @@ set %start #scnt
 
 set #LPC 1000
 tile init
-gosub updateTitle
 
 miningLoop:
 set %mustBank #false
@@ -51,24 +52,86 @@ gosub resetSpots
 for %miningLoop 1 %spots
 {
     gosub updateTitle
-    
+
     set %mineX %spotX . %miningLoop
     set %mineY %spotY . %miningLoop
     set %mineZ %spotZ . %miningLoop
-    set %mineTile %spotTile . %miningLoop
-    
-    gosub smartPathFind %mineX %mineY %mineZ 1
-    if ( #result = #true )
-        gosub mine %mineX %mineY %mineZ %mineTile
 
-    if ( %mustBank = #true )
-        break
+    gosub hasUnminedTileAround %mineX %mineY
+    if ( #result = #true )
+    {
+        gosub smartPathFind %mineX %mineY %mineZ %pathFindMineSpotTolerance
+        if ( #result = #true )
+        {
+            set %_startX %mineX - 1
+            set %_startY %mineY - 1
+            set %_endX %mineX + 1
+            set %_endY %mineY + 1
+            
+            for %_loopX %_startX %_endX
+            {
+                for %_loopY %_startY %_endY
+                {
+                    if ( %_loopX = %mineX && %_loopY = %mineY )
+                        continue
+
+                    gosub isLocationMineable %_loopX %_loopY
+                    if ( #result = #true )
+                    {
+                        set %_mineLocation %1 , _ , %2
+                        set %_mineLocationTileType %spotTileType . %_mineLocation
+                        set %_mineLocationZ %spotZ . %_mineLocation
+
+                        gosub mine %_loopX %_loopY %_mineLocationZ %_mineLocationTileType
+                        
+                        set %spotMined . %_mineLocation #true
+                    }
+
+                    if ( %mustBank = #true )
+                        goto skipMine
+                }
+            }
+        }
+    }
 }
-gosub smartPathFind %forgeX %forgeY %forgeZ 1
+skipMine:
+gosub smartPathFind %forgeX %forgeY %forgeZ %pathFindForgeTolerance
 gosub smelt
 gosub bank
 wait 20
 goto miningLoop
+
+; gosub hasUnminedTileAround locationX locationY
+sub hasUnminedTileAround
+set %_hasUnminedTileAroundLocationX %1
+set %_hasUnminedTileAroundLocationY %2
+set %_hasUnminedTileAroundStartX %_hasUnminedTileAroundLocationX - 1
+set %_hasUnminedTileAroundStartY %_hasUnminedTileAroundLocationY - 1
+set %_hasUnminedTileAroundEndX %_hasUnminedTileAroundLocationX + 1
+set %_hasUnminedTileAroundEndY %_hasUnminedTileAroundLocationY + 1
+
+for %_hasUnminedTileAroundLoopX %_hasUnminedTileAroundStartX %_hasUnminedTileAroundEndX
+{
+    for %_hasUnminedTileAroundLoopY %_hasUnminedTileAroundStartY %_hasUnminedTileAroundEndY
+    {
+        if ( %_hasUnminedTileAroundLoopX = %_hasUnminedTileAroundLocationX && %_hasUnminedTileAroundLoopY = %_hasUnminedTileAroundLocationY )
+            continue ; can't mine under yourself
+        
+        gosub isLocationMineable %_hasUnminedTileAroundLoopX %_hasUnminedTileAroundLoopY
+        if ( #result = #true )
+            return #true
+    }
+}
+return #false
+
+; gosub isLocationMined x y
+sub isLocationMineable
+set %_isLocationMineableX_Y %1 , _ , %2
+set %_isLocationMineableIsMined %spotMined . %_isLocationMineableX_Y
+if ( %_isLocationMineableIsMined = #false )
+    return #true
+return #false ; this case handle N/A
+
 
 sub resetForge
 findItem %forge G_3
@@ -84,31 +147,22 @@ set %startX %forgeX - %mineArea
 set %startY %forgeY - %mineArea
 set %endX %forgeX + %mineArea
 set %endY %forgeY + %mineArea
-set %order 1
 set %_startY %startY
 set %_endY %endY
 set %spots 0
 for %_loopX %startX %endX
 {
-    if ( %order = 2 )
-    {
-        set %order 1
-        set %swapY %_startY
-        set %_startY %_endY
-        set %_endY %swapY
-    }
-    else
-    {
-        set %order 2
-    }
-
     for %_loopY %_startY %_endY
     {
         tile cnt %_loopX %_loopY
-
+        set %_skipSpot #false
+        
         for %tile 1 #tileCnt
         {
             tile get %_loopX %_loopY %tile
+
+            if ( #tileName in stalagmites_flowstone )
+                set %_skipSpot #true
 
             if ( ( #tileType >= 1339 && #tileType <= 1345 ) )
             {
@@ -116,9 +170,14 @@ for %_loopX %startX %endX
                 set %spotX . %spots %_loopX
                 set %spotY . %spots %_loopY
                 set %spotZ . %spots #tileZ
-                set %spotTile . %spots #tileType
+                set %spotMined . %_loopX , _ , %_loopY #false
+                set %spotTileType . %_loopX , _ , %_loopY #tileType
+                set %spotZ . %_loopX , _ , %_loopY #tileZ
             }
         }
+        
+        if ( %_skipSpot = #true )
+            set %spots %spots - 1
     }
 }
 return
@@ -139,13 +198,13 @@ while ( #result = #false )
     set %_bestCandidateX #charPosX
     set %_bestCandidateY #charPosY
     set %_bestCandidateZ #charPosZ
-    
+
     for %_candidate 1 %spots
     {
         set %_candidateX %spotX . %_candidate
         set %_candidateY %spotY . %_candidate
         set %_candidateZ %spotZ . %_candidate
-        
+
         gosub isBetterSmartPathFindCandidate %_candidateX %_candidateY %_smartPathFindX %_smartPathFindY %_bestCandidateX %_bestCandidateY %maximumPathfindDistance
         if ( #result = #true )
         {
@@ -154,7 +213,7 @@ while ( #result = #false )
             set %_bestCandidateZ %_candidateZ
         }
     }
-    
+
     if ( %_bestCandidateX = #charPosX && %_bestCandidateY = #charPosY )
         return #false ; no candidate found
 
@@ -251,16 +310,16 @@ if ( %_nodeTries > %nodeMaximumTries )
     return
 if ( #weight >= %smeltWeight )
 {
-    gosub smartPathFind %forgeX %forgeY %forgeZ 1
-    move %forgeX %forgeY %forgeZ 1
+    gosub smartPathFind %forgeX %forgeY %forgeZ %pathFindForgeTolerance
     gosub smelt
+
     if ( #weight >= %bankWeight )
     {
         set %mustBank #true
 
         return
     }
-    gosub smartPathFind %_mineX %_mineY %_mineZ 1
+    gosub smartPathFind %_mineX %_mineY %_mineZ %pathFindMineSpotTolerance
 }
 findItem %miningTools C_
 if ( #findKind = -1 )
@@ -287,22 +346,22 @@ if ( #jIndex <= %_journal )
     goto _mineJournal
 set %_journal %_journal + 1
 scanJournal %_journal
-if there_is_nothing_here in #journal
+if ( there_is_nothing_here in #journal )
     return
-if you_loosen_some_rocks in #journal
+if ( you_loosen_some_rocks in #journal )
     goto _mine
-if you_put in #journal
+if ( you_put in #journal )
 {
     set %_nodeTries 0
     goto _mine
 }
-if you_cannot_mine in #journal
+if ( you_cannot_mine in #journal )
     return
-if you_have_no_line in #journal
+if ( you_have_no_line in #journal )
     return
-if try_mining_elsewhere in #journal
+if ( try_mining_elsewhere in #journal )
     return
-if that_is_too_far in #journal
+if ( that_is_too_far in #journal )
     return
 goto _mineJournal
 
