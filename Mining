@@ -2,14 +2,14 @@
 set %runebookId PIWYJMD          ; Runebook ID (first rune = drop location, 2-16th runes = mines)
 set %dropContainerId XWNAKMD     ; Work container (drop ingots/ores, contains recall scroll, contains pickaxes)
 set %smeltWeight 350             ; Weight needed to go smelt
-set %bankWeight 150              ; Weight needed after smelting to go bank
+set %bankWeight 175              ; Weight needed after smelting to go bank
 set %smelt1x1 #false             ; Smelt ores one by one (#true/#false)
 set %miningToolsRecharge 4       ; Amount of mining tools to have before going back mining (1 if you got newbied pickaxe)
 set %mines 15                    ; Number of mines in runebook (slot 2-16)
 set %rechargeRunebook #true      ; Recharge runebook (#true/#false)
 set %maxRunebookCharges 10       ; Maximum charges in runebook
 set %miningToolsToCraft 10       ; When out of pickaxes, amount to craft
-set %mineArea 30                 ; Area to scan for minable tiles around forge
+set %mineArea 40                 ; Area to scan for minable tiles around forge
 set %maximumPathfindDistance 19  ; Maximum distance to pathFind
 set %smartPathFindTimeout 60     ; Maximum time allowed per smart pathfind (seconds)
 set %pathfindTimeout 10          ; Maximum time allowed per pathfind (seconds)
@@ -37,7 +37,7 @@ set %recallScrollsUsed 0
 
 ; Do not change
 set %mustBank #false
-set %currentMine 3
+set %currentMine 1
 set %start #scnt
 
 set #LPC 1000
@@ -71,7 +71,7 @@ wait 20
 goto miningLoop
 
 sub resetForge
-findItem %forge G_
+findItem %forge G_3
 if ( #findKind = -1 )
     pause
 set %forgeX #findX
@@ -136,9 +136,9 @@ while ( #result = #false )
     if ( %_smartPathFindTimeout < #scnt )
         break
 
-    set %_bestCandidateX %_smartPathFindX
-    set %_bestCandidateY %_smartPathFindY
-    set %_bestCandidateZ %_smartPathFindZ
+    set %_bestCandidateX #charPosX
+    set %_bestCandidateY #charPosY
+    set %_bestCandidateZ #charPosZ
     
     for %_candidate 1 %spots
     {
@@ -151,9 +151,12 @@ while ( #result = #false )
         {
             set %_bestCandidateX %_candidateX
             set %_bestCandidateY %_candidateY
-            set %_bestCandidateZ %_candidateY
+            set %_bestCandidateZ %_candidateZ
         }
     }
+    
+    if ( %_bestCandidateX = #charPosX && %_bestCandidateY = #charPosY )
+        return #false ; no candidate found
 
     gosub pathFind %_bestCandidateX %_bestCandidateY %_bestCandidateZ %_smartPathFindTolerance
     if ( #result = #false )
@@ -171,12 +174,15 @@ set %_distanceToCandidateY #charPosY - %2 abs
 if ( %_distanceToCandidateX > %7 || %_distanceToCandidateY > %7 )
     return #false ; Candidate is out of reach
 
-set %_bestCandidateDistanceDestinationX %5 - %3 abs
-set %_bestCandidateDistanceDestinationY %6 - %4 abs
-set %_candidateDistanceToDestinationX %1 - %3 abs
-set %_candidateDistanceToDestinationY %2 - %4 abs
+set %_distanceCandidateToDestinationX %1 - %3 abs
+set %_distanceCandidateToDestinationY %2 - %4 abs
+set %_distanceCandidateToDestination %_distanceCandidateToDestinationX + %_distanceCandidateToDestinationY
 
-if ( %_candidateDistanceToDestinationX < %_bestCandidateDistanceDestinationX && %_candidateDistanceToDestinationY < %_bestCandidateDistanceDestinationY )
+set %_distanceBestCandidateToDestinationX %5 - %3 abs
+set %_distanceBestCandidateToDestinationY %6 - %4 abs
+set %_distanceBestCandidateToDestination %_distanceBestCandidateToDestinationX + %_distanceBestCandidateToDestinationY
+
+if ( %_distanceCandidateToDestination < %_distanceBestCandidateToDestination )
     return #true ; Candidate is in reach and nearer to wanted destination
 
 return #false ; Candidate is in reach, but farer to wanted destination
