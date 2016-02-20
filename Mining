@@ -1,11 +1,11 @@
 ; Configuration
+set %mines 10                    ; Number of mines in runebook (slot 2-16)
 set %runebookId PIWYJMD          ; Runebook ID (first rune = drop location, 2-16th runes = mines)
 set %dropContainerId XWNAKMD     ; Work container (drop ingots/ores, contains recall scroll, contains pickaxes)
 set %smeltWeight 350             ; Weight needed to go smelt
 set %bankWeight 175              ; Weight needed after smelting to go bank
 set %smelt1x1 #false             ; Smelt ores one by one (#true/#false)
 set %miningToolsRecharge 4       ; Amount of mining tools to have before going back mining (1 if you got newbied pickaxe)
-set %mines 15                    ; Number of mines in runebook (slot 2-16)
 set %rechargeRunebook #true      ; Recharge runebook (#true/#false)
 set %maxRunebookCharges 10       ; Maximum charges in runebook
 set %miningToolsToCraft 10       ; When out of pickaxes, amount to craft
@@ -129,7 +129,7 @@ for %_loopX %startX %endX
         {
             tile get %_loopX %_loopY %tile
 
-            if ( #tileName in stalagmites_flowstone_cave_wall )
+            if ( #tileName in stalagmites_flowstone_cave_wall || ( #tileName = rock && #tileZ = 28 ) )
                 set %_skipSpot #true
 
             if ( ( #tileType >= 1339 && #tileType <= 1345 ) )
@@ -463,6 +463,7 @@ wait 10
 goto _dropIngotsOres
 
 sub restockMiningTools
+_restockMiningTools:
 findItem %miningTools C_ , #backPackId
 if ( #findCnt >= %miningToolsRecharge )
     return
@@ -470,7 +471,10 @@ set %miningToolsToGrab %miningToolsRecharge - #findCnt
 gosub openContainer %dropContainerId
 findItem %miningTools C_ , %dropContainerId
 if ( #findCnt < %miningToolsToGrab )
+{
     gosub craftMiningTools
+    goto _restockMiningTools
+}
 for %_loop 1 %miningToolsToGrab
 {
     findItem %miningTools C_ , %dropContainerId
