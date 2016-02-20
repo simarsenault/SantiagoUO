@@ -101,38 +101,6 @@ gosub bank
 wait 20
 goto miningLoop
 
-; gosub hasUnminedTileAround locationX locationY
-sub hasUnminedTileAround
-set %_hasUnminedTileAroundLocationX %1
-set %_hasUnminedTileAroundLocationY %2
-set %_hasUnminedTileAroundStartX %_hasUnminedTileAroundLocationX - 1
-set %_hasUnminedTileAroundStartY %_hasUnminedTileAroundLocationY - 1
-set %_hasUnminedTileAroundEndX %_hasUnminedTileAroundLocationX + 1
-set %_hasUnminedTileAroundEndY %_hasUnminedTileAroundLocationY + 1
-
-for %_hasUnminedTileAroundLoopX %_hasUnminedTileAroundStartX %_hasUnminedTileAroundEndX
-{
-    for %_hasUnminedTileAroundLoopY %_hasUnminedTileAroundStartY %_hasUnminedTileAroundEndY
-    {
-        if ( %_hasUnminedTileAroundLoopX = %_hasUnminedTileAroundLocationX && %_hasUnminedTileAroundLoopY = %_hasUnminedTileAroundLocationY )
-            continue ; can't mine under yourself
-        
-        gosub isLocationMineable %_hasUnminedTileAroundLoopX %_hasUnminedTileAroundLoopY
-        if ( #result = #true )
-            return #true
-    }
-}
-return #false
-
-; gosub isLocationMined x y
-sub isLocationMineable
-set %_isLocationMineableX_Y %1 , _ , %2
-set %_isLocationMineableIsMined %spotMined . %_isLocationMineableX_Y
-if ( %_isLocationMineableIsMined = #false )
-    return #true
-return #false ; this case handle N/A
-
-
 sub resetForge
 findItem %forge G_3
 if ( #findKind = -1 )
@@ -161,7 +129,7 @@ for %_loopX %startX %endX
         {
             tile get %_loopX %_loopY %tile
 
-            if ( #tileName in stalagmites_flowstone )
+            if ( #tileName in stalagmites_flowstone_cave_wall )
                 set %_skipSpot #true
 
             if ( ( #tileType >= 1339 && #tileType <= 1345 ) )
@@ -181,6 +149,37 @@ for %_loopX %startX %endX
     }
 }
 return
+
+; gosub hasUnminedTileAround locationX locationY
+sub hasUnminedTileAround
+set %_hasUnminedTileAroundLocationX %1
+set %_hasUnminedTileAroundLocationY %2
+set %_hasUnminedTileAroundStartX %_hasUnminedTileAroundLocationX - 1
+set %_hasUnminedTileAroundStartY %_hasUnminedTileAroundLocationY - 1
+set %_hasUnminedTileAroundEndX %_hasUnminedTileAroundLocationX + 1
+set %_hasUnminedTileAroundEndY %_hasUnminedTileAroundLocationY + 1
+
+for %_hasUnminedTileAroundLoopX %_hasUnminedTileAroundStartX %_hasUnminedTileAroundEndX
+{
+    for %_hasUnminedTileAroundLoopY %_hasUnminedTileAroundStartY %_hasUnminedTileAroundEndY
+    {
+        if ( %_hasUnminedTileAroundLoopX = %_hasUnminedTileAroundLocationX && %_hasUnminedTileAroundLoopY = %_hasUnminedTileAroundLocationY )
+            continue ; can't mine under yourself
+
+        gosub isLocationMineable %_hasUnminedTileAroundLoopX %_hasUnminedTileAroundLoopY
+        if ( #result = #true )
+            return #true
+    }
+}
+return #false
+
+; gosub isLocationMineable x y
+sub isLocationMineable
+set %_isLocationMineableX_Y %1 , _ , %2
+set %_isLocationMineableIsMined %spotMined . %_isLocationMineableX_Y
+if ( %_isLocationMineableIsMined = #false )
+    return #true
+return #false ; this case handle N/A
 
 ; gosub smartPathFind [x] [y] [z] [tolerance]
 sub smartPathFind
@@ -312,6 +311,7 @@ if ( #weight >= %smeltWeight )
 {
     gosub smartPathFind %forgeX %forgeY %forgeZ %pathFindForgeTolerance
     gosub smelt
+    wait 10
 
     if ( #weight >= %bankWeight )
     {
