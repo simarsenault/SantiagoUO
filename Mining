@@ -1,16 +1,27 @@
 ; Configuration
 set %mines 10                    ; Number of mines in runebook (slot 2-16)
 set %runebookId PIWYJMD          ; Runebook ID (first rune = drop location, 2-16th runes = mines)
-set %dropContainerId XWNAKMD     ; Work container (drop ingots/ores, contains recall scroll, contains pickaxes)
+if ( #charName = Stella )
+{
+    set %mines 10
+    set %runebookId PIWYJMD
+}
+if ( #charName = Bentley )
+{
+    set %mines 9
+    set %runebookId BOYBKMD
+}
+set %dropContainerId XWNAKMD     ; Work container (drop ingots/ores, contains recall scroll, pickaxes and tinker tool)
 set %smeltWeight 350             ; Weight needed to go smelt
 set %bankWeight 175              ; Weight needed after smelting to go bank
+set %percentSwitchMine 60        ; Percentage at which it will trigger a mine switch after banking
 set %smelt1x1 #false             ; Smelt ores one by one (#true/#false)
 set %miningToolsRecharge 4       ; Amount of mining tools to have before going back mining (1 if you got newbied pickaxe)
 set %rechargeRunebook #true      ; Recharge runebook (#true/#false)
 set %maxRunebookCharges 10       ; Maximum charges in runebook
 set %miningToolsToCraft 10       ; When out of pickaxes, amount to craft
 set %mineArea 40                 ; Area to scan for minable tiles around forge
-set %maximumPathfindDistance 19  ; Maximum distance to pathFind
+set %maximumPathfindDistance 17  ; Maximum distance to pathFind
 set %smartPathFindTimeout 60     ; Maximum time allowed per smart pathfind (seconds)
 set %pathfindTimeout 10          ; Maximum time allowed per pathfind (seconds)
 set %miningTimeout 8             ; Maximum time allowed per mining stroke (seconds)
@@ -39,6 +50,7 @@ set %recallScrollsUsed 0
 
 ; Do not change
 set %mustBank #false
+set %mineChanged #true
 set %currentMine 1
 set %start #scnt
 
@@ -47,12 +59,13 @@ tile init
 
 miningLoop:
 set %mustBank #false
+if ( %mineChanged = #false )
+    goto _miningLoop
 gosub resetForge
 gosub resetSpots
 for %miningLoop 1 %spots
 {
-    gosub updateTitle
-
+    _miningLoop:
     set %mineX %spotX . %miningLoop
     set %mineY %spotY . %miningLoop
     set %mineZ %spotZ . %miningLoop
@@ -72,6 +85,8 @@ for %miningLoop 1 %spots
             {
                 for %_loopY %_startY %_endY
                 {
+                    gosub updateTitle
+                    
                     if ( %_loopX = %mineX && %_loopY = %mineY )
                         continue
 
@@ -88,12 +103,22 @@ for %miningLoop 1 %spots
                     }
 
                     if ( %mustBank = #true )
+                    {
+                        set %percentDone ( %miningLoop / %spots ) * 100
+                        if ( %percentDone >= %percentSwitchMine )
+                            goto switchMine
                         goto skipMine
+                    }
                 }
             }
         }
     }
 }
+switchMine:
+set %mineChanged #true
+set %currentMine %currentMine + 1
+if ( %currentMine > %mines )
+    set %currentMine 1
 skipMine:
 gosub smartPathFind %forgeX %forgeY %forgeZ %pathFindForgeTolerance
 gosub smelt
@@ -132,7 +157,7 @@ for %_loopX %startX %endX
             if ( #tileName in stalagmites_flowstone_cave_wall || ( #tileName = rock && #tileZ = 28 ) )
                 set %_skipSpot #true
 
-            if ( ( #tileType >= 1339 && #tileType <= 1345 ) )
+            if ( #tileType >= 1339 && #tileType <= 1345 && unknown2 notin #tileFlags )
             {
                 set %spots %spots + 1
                 set %spotX . %spots %_loopX
@@ -316,7 +341,7 @@ if ( #weight >= %smeltWeight )
     if ( #weight >= %bankWeight )
     {
         set %mustBank #true
-
+        
         return
     }
     gosub smartPathFind %_mineX %_mineY %_mineZ %pathFindMineSpotTolerance
@@ -438,9 +463,6 @@ gosub dropIngotsOres
 gosub restockMiningTools
 if ( %rechargeRunebook = #true )
     gosub rechargeRunebook
-set %currentMine %currentMine + 1
-if ( %currentMine > %mines )
-    set %currentMine 1
 set %mineTemp %currentMine + 1
 gosub recall %mineTemp
 return
@@ -576,7 +598,7 @@ goto _openContainer
 sub updateTitle
 gosub getElapsedTime
 set %elapsedTime #result
-setUoTitle Ultima Online - #charName ( , #shard , ) - Iron: %ironCollected Stone: %stoneCollected Tools: %miningToolsUsed Recall: %recallScrollsUsed Time: %elapsedTime
+setUoTitle Ultima Online - #charName ( , #shard , ) - Mine %currentMine , / , %mines Progess %miningLoop , / , %spots  - Iron: %ironCollected Stone: %stoneCollected Tools: %miningToolsUsed Recall: %recallScrollsUsed Time: %elapsedTime
 return
 
 sub getElapsedTime
