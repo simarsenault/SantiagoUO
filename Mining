@@ -50,13 +50,19 @@ set %miningToolsUsed 0
 set %recallScrollsUsed 0
 set %deaths 0
 
+; Costs
+set %ironValue 15
+set %stoneValue 10
+set %toolCost %ironValue * %ironRequiredMiningTool
+set %recallScrollCost 50
+
 ; Do not change
 set %mustBank #false
 set %mineChanged #true
 set %currentMine 1
 set %start #scnt
 
-set #LPC 1000
+linesPerCycle 1000
 tile init
 
 miningLoop:
@@ -683,6 +689,13 @@ while ( %_seconds >= 60 )
 
 return %_days , d , #spc ,  %_hours , h , #spc ,  %_minutes , m , #spc , %_seconds , s
 
+sub calculateNetProfit
+set %_netProfit %ironCollected * %ironValue
+set %_netProfit %_netProfit + ( %stoneCollected * %stoneValue )
+set %_netProfit %_netProfit - ( %miningToolsUsed * %toolCost )
+set %_netProfit %_netProfit - ( %recallScrollsUsed * %recallScrollCost )
+return %_netProfit
+
 sub updateStatisticsMenu
 menu clear
 menu window title Rukk's Mining Script
@@ -738,7 +751,8 @@ set %_mineProgress %miningLoop * 100 / %spots
 menu text lblCurrentMineProgressValue 190 80 %miningLoop , / , %spots , #spc , ( , %_mineProgress , % , )
 menu text lblPickaxesValue 380 80 %miningToolsUsed
 menu text lblRecallScrollsValue 120 100 %recallScrollsUsed
-menu text lblEstimatedNetProfitValue 415 100 N/A
+gosub calculateNetProfit
+menu text lblEstimatedNetProfitValue 415 100 #result
 gosub getElapsedTime
 menu text lblRunTimeValue 90 120 #result
 
