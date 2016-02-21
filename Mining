@@ -80,13 +80,13 @@ for %miningLoop 1 %spots
             set %_startY %mineY - 1
             set %_endX %mineX + 1
             set %_endY %mineY + 1
-            
+
             for %_loopX %_startX %_endX
             {
                 for %_loopY %_startY %_endY
                 {
-                    gosub updateTitle
-                    
+                    gosub updateStatisticsMenu
+
                     if ( %_loopX = %mineX && %_loopY = %mineY )
                         continue
 
@@ -98,13 +98,13 @@ for %miningLoop 1 %spots
                         set %_mineLocationZ %spotZ . %_mineLocation
 
                         gosub mine %_loopX %_loopY %_mineLocationZ %_mineLocationTileType
-                        
+
                         set %spotMined . %_mineLocation #true
                     }
 
                     if ( %mustBank = #true )
                     {
-                        set %percentDone ( %miningLoop / %spots ) * 100
+                        set %percentDone %miningLoop * 100 / %spots
                         if ( %percentDone >= %percentSwitchMine )
                             goto switchMine
                         goto skipMine
@@ -149,7 +149,7 @@ for %_loopX %startX %endX
     {
         tile cnt %_loopX %_loopY
         set %_skipSpot #false
-        
+
         for %tile 1 #tileCnt
         {
             tile get %_loopX %_loopY %tile
@@ -168,7 +168,7 @@ for %_loopX %startX %endX
                 set %spotZ . %_loopX , _ , %_loopY #tileZ
             }
         }
-        
+
         if ( %_skipSpot = #true )
             set %spots %spots - 1
     }
@@ -341,7 +341,7 @@ if ( #weight >= %smeltWeight )
     if ( #weight >= %bankWeight )
     {
         set %mustBank #true
-        
+
         return
     }
     gosub smartPathFind %_mineX %_mineY %_mineZ %pathFindMineSpotTolerance
@@ -595,12 +595,6 @@ if ( #contId = %_containerId )
    return
 goto _openContainer
 
-sub updateTitle
-gosub getElapsedTime
-set %elapsedTime #result
-setUoTitle Ultima Online - #charName ( , #shard , ) - Mine %currentMine , / , %mines Progess %miningLoop , / , %spots  - Iron: %ironCollected Stone: %stoneCollected Tools: %miningToolsUsed Recall: %recallScrollsUsed Time: %elapsedTime
-return
-
 sub getElapsedTime
 set %_days 0
 set %_hours 0
@@ -622,4 +616,87 @@ while ( %_seconds >= 60 )
     set %_seconds %_seconds - 60
 }
 
-return %_days , d , %_hours , h , %_minutes , m , %_seconds , s
+return %_days , d , #spc ,  %_hours , h , #spc ,  %_minutes , m , #spc , %_seconds , s
+
+sub updateStatisticsMenu
+menu clear
+menu window title Rukk's Mining Script
+menu window color black
+menu window size 500 270
+menu font bgcolor black
+menu font color lime
+menu font style b
+menu font size 14
+menu text lblTitle 150 5 Rukk's Mining Script
+
+menu font color white
+menu font style b
+menu font size 12
+menu text lblCharName 10 40 Character:
+menu text lblDeaths 300 40 Deaths:
+menu text lblCurrentMine 10 60 Current mine:
+menu text lblTotalMines 300 60 Total mines:
+menu text lblCurrentMineProgress 10 80 Current mine progress:
+menu text lblPickaxes 300 80 Pickaxes:
+menu text lblRecallScrolls 10 100 Recall scrolls:
+menu text lblEstimatedNetProfit 300 100 Est. Net Profit:
+menu text lblRunTime 10 120 Run time:
+
+menu text lblIron 10 160 Iron:
+menu text lblStone 130 160 Stone:
+menu text lblCopper 250 160 Copper:
+menu text lblAgapite 370 160 Agapite:
+menu text lblSilver 10 180 Silver:
+menu text lblShadow 130 180 Shadow:
+menu text lblGold 250 180 Gold:
+menu text lblRose 370 180 Rose:
+menu text lblValorite 10 200 Valorite:
+menu text lblVerite 130 200 Verite:
+menu text lblMytheril 250 200 Mytheril:
+menu text lblBloodrock 370 200 Bloodrock:
+menu text lblBlackrock 10 220 Blackrock:
+menu text lblPlatinum 130 220 Platinum:
+menu text lblCarbonPolymer 250 220 Carbon:
+menu text lblKevlar 370 220 Kevlar:
+menu text lblDelta 10 240 Delta:
+menu text lblLiquid 130 240 Liquid:
+menu text lblRagnarok 250 240 Ragnarok:
+menu text lblTotal 370 240 TOTAL:
+
+menu font style
+menu font color red
+menu text lblCharNameValue 95 40 #charName
+menu text lblDeathsValue 365 40 N/A
+menu text lblCurrentMineValue 120 60 %currentMine
+menu text lblTotalMinesValue 395 60 %mines
+set %_mineProgress %miningLoop * 100 / %spots
+menu text lblCurrentMineProgressValue 190 80 %miningLoop , / , %spots , #spc , ( , %_mineProgress , % , )
+menu text lblPickaxesValue 380 80 %miningToolsUsed
+menu text lblRecallScrollsValue 120 100 %recallScrollsUsed
+menu text lblEstimatedNetProfitValue 415 100 N/A
+gosub getElapsedTime
+menu text lblRunTimeValue 90 120 #result
+
+menu text lblIronValue 50 160 %ironCollected
+menu text lblStoneValue 185 160 %stoneCollected
+menu text lblCopperValue 315 160 N/A
+menu text lblAgapiteValue 435 160 N/A
+menu text lblSilverValue 62 180 N/A
+menu text lblShadowValue 200 180 N/A
+menu text lblGoldValue 295 180 N/A
+menu text lblRoseValue 420 180 N/A
+menu text lblValoriteValue 75 200 N/A
+menu text lblVeriteValue 180 200 N/A
+menu text lblMytherilValue 320 200 N/A
+menu text lblBloodrockValue 460 200 N/A
+menu text lblBlackrockValue 95 220 N/A
+menu text lblPlatinumValue 205 220 N/A
+menu text lblCarbonPolymerValue 315 220 N/A
+menu text lblKevlarValue 428 220 N/A
+menu text lblDeltaValue 60 240 N/A
+menu text lblLiquidValue 185 240 N/A
+menu text lblRagnarokValue 332 240 N/A
+set %_totalIngotsOres %ironCollected + %stoneCollected
+menu text lblTotalValue 430 240 %_totalIngotsOres
+menu show
+return
