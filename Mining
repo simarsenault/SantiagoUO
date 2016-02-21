@@ -26,6 +26,7 @@ set %smartPathFindTimeout 60     ; Maximum time allowed per smart pathfind (seco
 set %pathfindTimeout 10          ; Maximum time allowed per pathfind (seconds)
 set %miningTimeout 8             ; Maximum time allowed per mining stroke (seconds)
 set %nodeMaximumTries 3          ; Maximum failed attempts per mining node before going to the next
+set %deathTime 6000              ; Time to wait before resurrecting (20 = 1 second)
 
 ; Constants
 set %tinkeringTools GTL
@@ -47,6 +48,7 @@ set %ironCollected 0
 set %stoneCollected 0
 set %miningToolsUsed 0
 set %recallScrollsUsed 0
+set %deaths 0
 
 ; Do not change
 set %mustBank #false
@@ -102,6 +104,9 @@ for %miningLoop 1 %spots
 
                         set %spotMined . %_mineLocation #true
                     }
+                    
+                    if ( #charGhost = yes )
+                        goto skipMine
 
                     if ( %mustBank = #true )
                     {
@@ -123,6 +128,12 @@ if ( %currentMine > %mines )
 skipMine:
 gosub smartPathFind %forgeX %forgeY %forgeZ %pathFindForgeTolerance
 gosub smelt
+if ( #charGhost = yes )
+{
+    wait %deathTime
+    set %deaths %deaths + 1
+    gosub resurrect
+}
 gosub bank
 wait 20
 goto miningLoop
@@ -596,6 +607,57 @@ if ( #contId = %_containerId )
    return
 goto _openContainer
 
+sub resurrect
+set %_resurrectX #charPosX
+set %_resurrectY #charPosY
+_resurrect:
+msg $home home home$
+wait 10
+if ( #charPosX = %_resurrectX || #charPosY = %_resurrectY )
+    goto _resurrect
+gosub pathfind 5182 1250 0 1
+gosub pathfind 5182 1237 0 1
+gosub pathfind 5182 1228 10 0
+gosub pathfind 5182 1223 40 1
+ignoreItem reset
+_clickResurrectionStone:
+findItem HTG G_1
+if ( #findKind = -1 )
+    pause
+if ( #findCol <> 66 )
+{
+    ignoreItem #findId
+    goto _clickResurrectionStone
+}
+ignoreItem reset
+set #lObjectId #findId
+event macro 17
+gosub waitGump 380 150
+if ( #result = #false )
+    goto _clickResurrectionStone
+click 72 100
+wait 120
+if ( #charGhost = yes )
+    goto _clickResurrectionStone
+event macro 8 1 ; open paperdoll
+event macro 8 2 ; open status
+event macro 8 7 ; open backpack
+wait 20
+move 5194 1229 0 10s
+return
+
+; gosub waitGump width height
+sub waitGump
+set %_waitGumpWidth %1
+set %_waitGumpHeight %2
+set %_waitGumpTimeout #scnt + 5
+_waitGump:
+if ( %_waitGumpTimeout < #scnt )
+    return #false
+if ( #contSizeX = %_waitGumpWidth && #contSizeY = %_waitGumpHeight )
+    return #true
+goto _waitGump
+
 sub getElapsedTime
 set %_days 0
 set %_hours 0
@@ -667,7 +729,7 @@ menu text lblTotal 370 240 TOTAL:
 menu font style
 menu font color red
 menu text lblCharNameValue 95 40 #charName
-menu text lblDeathsValue 365 40 N/A
+menu text lblDeathsValue 365 40 %deaths
 menu text lblCurrentMineValue 120 60 %currentMine
 menu text lblTotalMinesValue 395 60 %mines
 set %_mineProgress %miningLoop * 100 / %spots
