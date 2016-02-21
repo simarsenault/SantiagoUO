@@ -63,6 +63,7 @@ if ( %mineChanged = #false )
     goto _miningLoop
 gosub resetForge
 gosub resetSpots
+set %mineChanged #false
 for %miningLoop 1 %spots
 {
     _miningLoop:
