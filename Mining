@@ -161,15 +161,16 @@ for %_loopX %startX %endX
     {
         tile cnt %_loopX %_loopY
         set %_skipSpot #false
+        set %_spotAdded #false
 
         for %tile 1 #tileCnt
         {
             tile get %_loopX %_loopY %tile
 
-            if ( #tileName in stalagmites_flowstone_cave_wall || ( #tileName = rock && #tileZ = 28 ) )
+            if ( #tileName in stalagmites_flowstone_cave_wall )
                 set %_skipSpot #true
 
-            if ( #tileType >= 1339 && #tileType <= 1345 && unknown2 notin #tileFlags )
+            if ( #tileType >= 1339 && #tileType <= 1359 )
             {
                 set %spots %spots + 1
                 set %spotX . %spots %_loopX
@@ -178,10 +179,11 @@ for %_loopX %startX %endX
                 set %spotMined . %_loopX , _ , %_loopY #false
                 set %spotTileType . %_loopX , _ , %_loopY #tileType
                 set %spotZ . %_loopX , _ , %_loopY #tileZ
+                set %_spotAdded #true
             }
         }
 
-        if ( %_skipSpot = #true )
+        if ( %_skipSpot = #true && %_spotAdded = #true )
             set %spots %spots - 1
     }
 }
