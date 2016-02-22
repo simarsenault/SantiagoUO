@@ -63,7 +63,6 @@ set %mineChanged #true
 set %currentMine 1
 set %start #scnt
 
-linesPerCycle 1000
 tile init
 
 miningLoop:
@@ -112,7 +111,7 @@ for %miningLoop 1 %spots
 
                         set %spotMined . %_mineLocation #true
                     }
-                    
+
                     if ( #charGhost = yes )
                         goto skipMine
 
@@ -156,6 +155,7 @@ set %forgeZ #findZ
 return
 
 sub resetSpots
+linesPerCycle 1000
 nameSpace local resetSpots
 nameSpace clear
 set %currentSpot 1
@@ -203,6 +203,7 @@ while ( %currentSpot <= %spots )
 
     set %currentSpot %currentSpot + 1
 }
+linesPerCycle 10
 return
 
 sub getMineableTileInfo
@@ -259,6 +260,7 @@ return #false ; this case handle N/A
 
 ; gosub smartPathFind [x] [y] [z] [tolerance]
 sub smartPathFind
+linesPerCycle 1000
 set %_smartPathFindX %1
 set %_smartPathFindY %2
 set %_smartPathFindZ %3
@@ -290,15 +292,19 @@ while ( #result = #false )
     }
 
     if ( %_bestCandidateX = #charPosX && %_bestCandidateY = #charPosY )
-        return #false ; no candidate found
+        goto _smartPathFindReturnFalse ; no candidate found
 
     gosub pathFind %_bestCandidateX %_bestCandidateY %_bestCandidateZ %_smartPathFindTolerance
     if ( #result = #false )
-        return #false
+        goto _smartPathFindReturnFalse
     gosub isCharPosWithinTolerance %_smartPathFindX %_smartPathFindY %maximumPathfindDistance
 }
+linesPerCycle 10
 gosub pathFind %_smartPathFindX %_smartPathFindY %_smartPathFindZ %_smartPathFindTolerance %_smartPathFindTimeout
 return #result
+_smartPathFindReturnFalse:
+linesPerCycle 10
+return #false
 
 ; gosub isBetterSmartPathFindCandidate candidateX candidateY destinationX destinationY bestCandidateX bestCandidateY maxDistance
 sub isBetterSmartPathFindCandidate
@@ -525,9 +531,9 @@ _dropIngotsOres:
 findItem %oresIngots C_ , #backpackId
 if ( #findKind = -1 )
     return
-if ( #findType in %ingots && #findCol = 0 )
+if ( #findCol = 0 )
     set %ironCollected %ironCollected + #findStack
-if ( #findType in %ingots && #findCol = 2103 )
+if ( #findCol = 2103 )
     set %stoneCollected %stoneCollected + #findStack
 ignoreitem #findid
 exevent drag #findId #findStack
@@ -537,6 +543,7 @@ wait 10
 goto _dropIngotsOres
 
 sub restockMiningTools
+ignoreItem reset
 _restockMiningTools:
 findItem %miningTools C_ , #backPackId
 if ( #findCnt >= %miningToolsRecharge )
@@ -547,6 +554,7 @@ findItem %miningTools C_ , %dropContainerId
 if ( #findCnt < %miningToolsToGrab )
 {
     gosub craftMiningTools
+    gosub dropIngotsOres ; safety
     goto _restockMiningTools
 }
 for %_loop 1 %miningToolsToGrab
@@ -561,6 +569,7 @@ set %miningToolsUsed %miningToolsUsed + %miningToolsToGrab
 return
 
 sub craftMiningTools
+ignoreItem reset
 findItem %tinkeringTools C_ , %dropContainerId
 if ( #findKind = -1 )
     pause
@@ -568,7 +577,6 @@ exevent drag #findId 1
 wait 10
 exevent dropC #backPackId
 wait 10
-ignoreItem reset
 _findIronIngots:
 findItem %ironIngots C_ , %dropContainerId
 if ( #findKind = -1 )
@@ -729,6 +737,7 @@ set %_netProfit %_netProfit - ( %recallScrollsUsed * %recallScrollCost )
 return %_netProfit
 
 sub updateStatisticsMenu
+linesPerCycle 1000
 menu clear
 menu window title Rukk's Mining Script
 menu window color black
@@ -810,4 +819,5 @@ menu text lblRagnarokValue 332 240 N/A
 set %_totalIngotsOres %ironCollected + %stoneCollected
 menu text lblTotalValue 430 240 %_totalIngotsOres
 menu show
+linesPerCycle 10
 return
