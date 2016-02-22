@@ -14,7 +14,7 @@ if ( #charName = Bentley )
 set %dropContainerId XWNAKMD     ; Work container (drop ingots/ores, contains recall scroll, pickaxes and tinker tool)
 set %smeltWeight 350             ; Weight needed to go smelt
 set %bankWeight 175              ; Weight needed after smelting to go bank
-set %percentSwitchMine 60        ; Percentage at which it will trigger a mine switch after banking
+set %percentSwitchMine 70        ; Percentage at which it will trigger a mine switch after banking
 set %smelt1x1 #false             ; Smelt ores one by one (#true/#false)
 set %miningToolsRecharge 4       ; Amount of mining tools to have before going back mining (1 if you got newbied pickaxe)
 set %rechargeRunebook #true      ; Recharge runebook (#true/#false)
@@ -27,6 +27,7 @@ set %pathfindTimeout 10          ; Maximum time allowed per pathfind (seconds)
 set %miningTimeout 8             ; Maximum time allowed per mining stroke (seconds)
 set %nodeMaximumTries 3          ; Maximum failed attempts per mining node before going to the next
 set %deathTime 6000              ; Time to wait before resurrecting (20 = 1 second)
+set %searchForgeDistance 8       ; Maximum distance forge will be from recall location
 
 ; Constants
 set %tinkeringTools GTL
@@ -102,6 +103,7 @@ for %miningLoop 1 %spots
                     gosub isLocationMineable %_loopX %_loopY
                     if ( #result = #true )
                     {
+                        set %spotsMined %spotsMined + 1
                         set %_mineLocation %1 , _ , %2
                         set %_mineLocationTileType %spotTileType . %_mineLocation
                         set %_mineLocationZ %spotZ . %_mineLocation
@@ -116,7 +118,7 @@ for %miningLoop 1 %spots
 
                     if ( %mustBank = #true )
                     {
-                        set %percentDone %miningLoop * 100 / %spots
+                        set %percentDone %spotsMined * 100 / %spots
                         if ( %percentDone >= %percentSwitchMine )
                             goto switchMine
                         goto skipMine
@@ -145,7 +147,7 @@ wait 20
 goto miningLoop
 
 sub resetForge
-findItem %forge G_3
+findItem %forge G_ , %searchForgeDistance
 if ( #findKind = -1 )
     pause
 set %forgeX #findX
@@ -154,46 +156,75 @@ set %forgeZ #findZ
 return
 
 sub resetSpots
-set %startX %forgeX - %mineArea
-set %startY %forgeY - %mineArea
-set %endX %forgeX + %mineArea
-set %endY %forgeY + %mineArea
-set %_startY %startY
-set %_endY %endY
-set %spots 0
-for %_loopX %startX %endX
+nameSpace local resetSpots
+nameSpace clear
+set %currentSpot 1
+set %spots 1
+set %spotX1 #charPosX
+set %spotY1 #charPosY
+set %spotsMined 0
+
+while ( %currentSpot <= %spots )
 {
-    for %_loopY %_startY %_endY
+    set %_startX ( %spotX . %currentSpot ) - 1
+    set %_endX ( %spotX . %currentSpot ) + 1
+    set %_startY ( %spotY . %currentSpot ) - 1
+    set %_endY ( %spotY . %currentSpot ) + 1
+
+    for %_loopX %_startX %_endX
     {
-        tile cnt %_loopX %_loopY
-        set %_skipSpot #false
-        set %_spotAdded #false
-
-        for %tile 1 #tileCnt
+        for %_loopY %_startY %_endY
         {
-            tile get %_loopX %_loopY %tile
+            if ( %_loopX = %currentSpotX && %_loopY = %currentSpotY )
+                continue;
 
-            if ( #tileName in stalagmites_flowstone_cave_wall )
-                set %_skipSpot #true
+            set %_spotLocation %_loopX , _ , %_loopY
+            set %spotAlreadyChecked !spotChecked . %_spotLocation
+            if ( %spotAlreadyChecked = #true )
+                continue
 
-            if ( #tileType >= 1339 && #tileType <= 1359 )
+            set !spotChecked . %_loopX , _ , %_loopY #true
+
+            gosub getMineableTileInfo %_loopX %_loopY
+            if ( #result = #true )
             {
                 set %spots %spots + 1
+                ; Informations needed for pathfind
                 set %spotX . %spots %_loopX
                 set %spotY . %spots %_loopY
-                set %spotZ . %spots #tileZ
-                set %spotMined . %_loopX , _ , %_loopY #false
-                set %spotTileType . %_loopX , _ , %_loopY #tileType
-                set %spotZ . %_loopX , _ , %_loopY #tileZ
-                set %_spotAdded #true
+                set %spotZ . %spots %_isTileMineableZ
+                ; Informations needed to mine
+                set %spotMined . %_spotLocation #false
+                set %spotTileType . %_spotLocation %_isTileMineableTileType
+                set %spotZ . %_spotLocation %_isTileMineableZ
             }
         }
-
-        if ( %_skipSpot = #true && %_spotAdded = #true )
-            set %spots %spots - 1
     }
+
+    set %currentSpot %currentSpot + 1
 }
 return
+
+sub getMineableTileInfo
+set %_isTileMineable #false
+set %_isTileMineableX %1
+set %_isTileMineableY %2
+tile cnt %_isTileMineableX %_isTileMineableY
+for %_isTileMineableLoop 1 #tileCnt
+{
+    tile get %_isTileMineableX %_isTileMineableY %_isTileMineableLoop
+
+    if ( #tileName in stalagmites_flowstone_cave_wall )
+        return #false
+
+    if ( #tileType >= 1339 && #tileType <= 1359 )
+    {
+        set %_isTileMineableZ #tileZ
+        set %_isTileMineableTileType #tileType
+        set %_isTileMineable #true
+    }
+}
+return %_isTileMineable
 
 ; gosub hasUnminedTileAround locationX locationY
 sub hasUnminedTileAround
@@ -429,6 +460,7 @@ for %_loop %_journal #jIndex
     if ( you_must_be_near in #journal )
         ignoreItem #findId
 }
+wait 5
 goto _smelt
 
 sub separateOres
@@ -747,8 +779,8 @@ menu text lblCharNameValue 95 40 #charName
 menu text lblDeathsValue 365 40 %deaths
 menu text lblCurrentMineValue 120 60 %currentMine
 menu text lblTotalMinesValue 395 60 %mines
-set %_mineProgress %miningLoop * 100 / %spots
-menu text lblCurrentMineProgressValue 190 80 %miningLoop , / , %spots , #spc , ( , %_mineProgress , % , )
+set %_mineProgress %spotsMined * 100 / %spots
+menu text lblCurrentMineProgressValue 190 80 %spotsMined , / , %spots , #spc , ( , %_mineProgress , % , )
 menu text lblPickaxesValue 380 80 %miningToolsUsed
 menu text lblRecallScrollsValue 120 100 %recallScrollsUsed
 gosub calculateNetProfit
