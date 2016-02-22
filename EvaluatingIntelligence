@@ -1,0 +1,6 @@
+loop:
+event macro 13 16
+target
+event macro 23
+wait 30
+goto loop
