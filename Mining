@@ -66,6 +66,7 @@ set %start #scnt
 tile init
 
 miningLoop:
+gosub updateStatisticsMenu
 set %mustBank #false
 if ( %mineChanged = #false )
     goto _miningLoop
@@ -94,8 +95,6 @@ for %miningLoop 1 %spots
             {
                 for %_loopY %_startY %_endY
                 {
-                    gosub updateStatisticsMenu
-
                     if ( %_loopX = %mineX && %_loopY = %mineY )
                         continue
 
