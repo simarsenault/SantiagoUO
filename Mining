@@ -113,7 +113,7 @@ for %miningLoop 1 %spots
                     }
 
                     if ( #charGhost = yes )
-                        goto skipMine
+                        goto switchMine
 
                     if ( %mustBank = #true )
                     {
@@ -137,7 +137,6 @@ gosub smartPathFind %forgeX %forgeY %forgeZ %pathFindForgeTolerance
 gosub smelt
 if ( #charGhost = yes )
 {
-    wait %deathTime
     set %deaths %deaths + 1
     gosub resurrect
 }
@@ -659,10 +658,13 @@ sub resurrect
 set %_resurrectX #charPosX
 set %_resurrectY #charPosY
 _resurrect:
+if ( #charGhost <> yes )
+    return
 msg $home home home$
 wait 10
 if ( #charPosX = %_resurrectX || #charPosY = %_resurrectY )
     goto _resurrect
+wait %deathTime
 gosub pathfind 5182 1250 0 1
 gosub pathfind 5182 1237 0 1
 gosub pathfind 5182 1228 10 0
