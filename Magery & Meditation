@@ -17,9 +17,11 @@ sub meditate
 _meditate:
 if ( #mana >= 100 )
     return
-event macro 13 46
 set %_journal #jIndex
+event macro 13 46
 _meditationJournal:
+if ( #mana >= 100 )
+    return
 if ( #jIndex <= %_journal )
     goto _meditationJournal
 set %_journal %_journal + 1
@@ -28,8 +30,6 @@ if you_are_at_peace in #journal
     return
 if you_lose_your_concentration in #journal
     goto _meditate
-if ( #mana >= 100 )
-    return
 goto _meditationJournal
 
 sub grabReagents
@@ -37,10 +37,10 @@ gosub openContainer %container
 findItem WZF C_ , %container
 if ( #findKind = -1 )
     halt
-exevent drag #findId 10
-wait 5
+exevent drag #findId 50
+wait 10
 exevent dropC #backPackId
-wait 5
+wait 10
 return
 
 ; gosub openContainer [containerId]
