@@ -47,6 +47,18 @@ set %pathFindForgeTolerance 1
 ; Stats
 set %ironCollected 0
 set %stoneCollected 0
+set %copperCollected 0
+set %agapiteCollected 0
+set %silverCollected 0
+set %shadowCollected 0
+set %goldCollected 0
+set %roseCollected 0
+set %valoriteCollected 0
+set %veriteCollected 0
+set %mytherilCollected 0
+set %bloodrockCollected 0
+set %blackrockCollected 0
+set %platinumCollected 0
 set %miningToolsUsed 0
 set %recallScrollsUsed 0
 set %deaths 0
@@ -524,15 +536,39 @@ gosub recall %mineTemp
 return
 
 sub dropIngotsOres
-ignoreitem reset
+ignoreItem reset
 _dropIngotsOres:
 findItem %oresIngots C_ , #backpackId
 if ( #findKind = -1 )
     return
-if ( #findCol = 0 )
+if ( #findType = RMK && #findCol = 0 )
     set %ironCollected %ironCollected + #findStack
-if ( #findCol = 2103 )
+if ( #findType = RMK && #findCol = 2103 )
     set %stoneCollected %stoneCollected + #findStack
+if ( #findType = NMK && #findCol = 0 )
+    set %copperCollected %copperCollected + #findStack
+if ( #findType = RMK && #findCol = 1024 )
+    set %agapiteCollected %agapiteCollected + #findStack
+if ( #findType = XMK && #findCol = 0 )
+    set %silverCollected %silverCollected + #findStack
+if ( #findType = RMK && #findCol = 1904 )
+    set %shadowCollected %shadowCollected + #findStack
+if ( #findType = TMK && #findCol = 0 )
+    set %goldCollected %goldCollected + #findStack
+if ( #findType = RMK && #findCol = 2049 )
+    set %roseCollected %roseCollected + #findStack
+if ( #findType = RMK && #findCol = 1301 )
+    set %valoriteCollected %valoriteCollected #findStack
+if ( #findType = RMK && #findCol = 2001 )
+    set %veriteCollected %veriteCollected + #findStack
+if ( #findType = RMK && #findCol = 504 )
+    set %mytherilCollected %mytherilCollected + #findStack
+if ( #findType = RMK && #findCol = 1218 )
+    set %bloodrockCollected %bloodrockCollected + #findStack
+if ( #findType = RMK && #findCol = 1908 )
+    set %blackrockCollected %blackrockCollected + #findStack
+if ( #findType = RMK && #findCol = 1153 )
+    set %platinumCollected %platinumCollected #findStack
 ignoreitem #findid
 exevent drag #findId #findStack
 wait 10
@@ -589,8 +625,14 @@ exevent drag #findId %_ironAmount
 wait 10
 exevent dropC #backPackId
 wait 10
+ignoreItem reset
 _craftMiningTool:
-findItem %ingots C_ , #backPackId
+findItem %ironIngots C_ , #backPackId
+if ( #findCol <> 0 )
+{
+    ignoreItem #findId
+    goto _craftMiningTool
+}
 if ( #findKind = -1 || #findStack < %ironRequiredMiningTool )
     goto _dropTinkeringTools
 msg $,waitmenu 'Tinkering' 'Tools' 'Tools' 'pickaxe'$
@@ -600,6 +642,7 @@ event macro 17
 wait 80
 goto _craftMiningTool
 _dropTinkeringTools:
+ignoreItem reset
 findItem %tinkeringTools C_ , #backPackId
 exevent drag #findId 1
 wait 10
@@ -800,24 +843,24 @@ menu text lblRunTimeValue 90 120 #result
 
 menu text lblIronValue 50 160 %ironCollected
 menu text lblStoneValue 185 160 %stoneCollected
-menu text lblCopperValue 315 160 N/A
-menu text lblAgapiteValue 435 160 N/A
-menu text lblSilverValue 62 180 N/A
-menu text lblShadowValue 200 180 N/A
-menu text lblGoldValue 295 180 N/A
-menu text lblRoseValue 420 180 N/A
-menu text lblValoriteValue 75 200 N/A
-menu text lblVeriteValue 180 200 N/A
-menu text lblMytherilValue 320 200 N/A
-menu text lblBloodrockValue 460 200 N/A
-menu text lblBlackrockValue 95 220 N/A
-menu text lblPlatinumValue 205 220 N/A
+menu text lblCopperValue 315 160 %copperCollected
+menu text lblAgapiteValue 435 160 %agapiteCollected
+menu text lblSilverValue 62 180 %silverCollected
+menu text lblShadowValue 200 180 %shadowCollected
+menu text lblGoldValue 295 180 %goldCollected
+menu text lblRoseValue 420 180 %roseCollected
+menu text lblValoriteValue 75 200 %valoriteCollected
+menu text lblVeriteValue 180 200 %veriteCollected
+menu text lblMytherilValue 320 200 %mytherilCollected
+menu text lblBloodrockValue 460 200 %bloodrockCollected
+menu text lblBlackrockValue 95 220 %blackrockCollected
+menu text lblPlatinumValue 205 220 %platinumCollected
 menu text lblCarbonPolymerValue 315 220 N/A
 menu text lblKevlarValue 428 220 N/A
 menu text lblDeltaValue 60 240 N/A
 menu text lblLiquidValue 185 240 N/A
 menu text lblRagnarokValue 332 240 N/A
-set %_totalIngotsOres %ironCollected + %stoneCollected
+set %_totalIngotsOres %ironCollected + %stoneCollected + %copperCollected + %agapiteCollected + %silverCollected + %shadowCollected + %goldCollected + %roseCollected + %valoriteCollected + %veriteCollected + %mytherilCollected + %bloodrockCollected + %blackrockCollected + %platinumCollected
 menu text lblTotalValue 430 240 %_totalIngotsOres
 menu show
 linesPerCycle 10
