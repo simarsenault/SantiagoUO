@@ -1,0 +1,6 @@
+loop:
+msg $,waitmenu 'Tracking' 'Animals' 'Tracking' 'MiaHorse'$
+event macro 13 38
+wait 40
+event macro 6
+goto loop
