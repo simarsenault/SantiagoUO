@@ -13,7 +13,8 @@ if ( #charName = Bentley )
 }
 set %dropContainerId XWNAKMD     ; Work container (drop ingots/ores, contains recall scroll, pickaxes and tinker tool)
 set %smeltWeight 350             ; Weight needed to go smelt
-set %bankWeight 175              ; Weight needed after smelting to go bank
+set %bankWeight 175              ; Weight above this value after smelting will trigger a bank
+set %bankIronIngots 100          ; Iron ingots above this value after smelting will trigger a bank
 set %percentSwitchMine 70        ; Percentage at which it will trigger a mine switch after banking
 set %smelt1x1 #false             ; Smelt ores one by one (#true/#false)
 set %miningToolsRecharge 4       ; Amount of mining tools to have before going back mining (1 if you got newbied pickaxe)
@@ -78,7 +79,6 @@ set %start #scnt
 tile init
 
 miningLoop:
-gosub updateStatisticsMenu
 set %mustBank #false
 if ( %mineChanged = #false )
     goto _miningLoop
@@ -109,6 +109,8 @@ for %miningLoop 1 %spots
                 {
                     if ( %_loopX = %mineX && %_loopY = %mineY )
                         continue
+
+                    gosub updateStatisticsMenu
 
                     gosub isLocationMineable %_loopX %_loopY
                     if ( #result = #true )
@@ -404,8 +406,9 @@ if ( #weight >= %smeltWeight )
     gosub smartPathFind %forgeX %forgeY %forgeZ %pathFindForgeTolerance
     gosub smelt
     wait 10
-
-    if ( #weight >= %bankWeight )
+    
+    gosub isBankingRequired
+    if ( #result = #true )
     {
         set %mustBank #true
 
@@ -491,6 +494,31 @@ wait 5
 exevent dropc #backpackid 80 80
 wait 5
 goto _seperateOres
+
+sub isBankingRequired
+if ( #weight >= %bankWeight )
+    return #true
+gosub findContainerStack #backPackId %ironIngots 0
+if ( #result >= %bankIronIngots )
+    return #true
+return #false
+
+; gosub findContainerStack containerId itemId color
+sub findContainerStack
+set %_findContainerStackContainerId %1
+set %_findContainerStackItemId %2
+set %_findContainerStackColor %3
+ignoreItem reset 1
+_findContainerStack:
+findItem %_findContainerStackItemId C_ , %_findContainerStackContainerId
+if ( #findKind = -1 )
+    return 0
+if ( #findCol <> %_findContainerStackColor )
+{
+    ignoreItem #findId 1
+    goto _findContainerStack
+}
+return #findStack
 
 ; gosub recall [rune]
 sub recall
