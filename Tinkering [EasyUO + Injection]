@@ -1,0 +1,60 @@
+set %containerId OHOAKMD
+
+loop:
+findItem RMK C_ , #backPackId
+if ( #findStack < 100 )
+{
+    gosub dropBottles
+    gosub grabIngots
+}
+findItem GTL C_ , #backPackId
+if ( #findKind = -1 )
+    pause
+set #lObjectId #findId
+msg $,waitmenu 'Tinkering' 'Tools' 'Tools' 'empty bottle'$
+event macro 17
+wait 70
+goto loop
+
+sub dropBottles
+findItem WUF C_ , #backPackId
+if ( #findKind = -1 )
+    return
+exevent drag #findId #findStack
+wait 10
+exevent dropC %containerId
+wait 10
+return
+
+sub grabIngots
+gosub openContainer %containerId
+ignoreItem reset
+_grabIngots:
+findItem RMK C_ , %containerId
+if ( #findCol <> 0 )
+{
+    ignoreItem #findId
+    goto _grabIngots
+}
+if ( #findKind = -1 || #findStack < 500 )
+    pause
+exevent drag #findId 500
+wait 10
+exevent dropC #backPackId
+wait 10
+return
+
+
+; gosub openContainer [containerId]
+sub openContainer
+set %_containerId %1
+_openContainer:
+set #lObjectId %_containerId
+event macro 17
+set %_timeout #scnt + 10
+_waitOpenContainer:
+if ( %_timeout < #scnt )
+    goto _openContainer
+if ( #contId = %_containerId )
+   return
+goto _openContainer
