@@ -13,7 +13,7 @@ if ( #findKind = -1 )
 set #lObjectId #findId
 msg $,waitmenu 'Tinkering' 'Tools' 'Tools' 'empty bottle'$
 event macro 17
-wait 70
+wait 80
 goto loop
 
 sub dropBottles
@@ -43,7 +43,6 @@ wait 10
 exevent dropC #backPackId
 wait 10
 return
-
 
 ; gosub openContainer [containerId]
 sub openContainer
