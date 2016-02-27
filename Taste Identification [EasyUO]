@@ -1,0 +1,10 @@
+set %itemId XCCCKMD
+
+loop:
+set #lTargetId %itemId
+set #lTargetKind 1
+event macro 13 36
+target
+event macro 22
+wait 30
+goto loop
