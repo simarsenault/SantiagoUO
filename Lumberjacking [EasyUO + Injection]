@@ -10,6 +10,7 @@ set %rechargeRunebook #true      ; Recharge runebook (#true/#false)
 set %maxRunebookCharges 10       ; Maximum charges in runebook
 set %toolsToCraft 10             ; When out of hatchets, amount to craft
 set %toolsRecharge 5             ; Amount of tools to have before going back lumberjacking (1 if you got newbied hatchet)
+set %deathTime 2400              ; Time to wait before resurrecting (20 = 1 second)
 
 ; Constants
 set %tools FSF_ASF
@@ -39,6 +40,12 @@ for %currentSpot 1 %spots
     
     gosub smartPathFind %spotX %spotY %spotZ 1
     gosub lumberjack %spotX %spotY %spotZ %spotTileType
+    
+    if ( #charGhost = yes )
+    {
+        gosub resurrect
+        break
+    }
     
     if ( %bankingRequired = #true )
         break
@@ -417,3 +424,57 @@ wait 10
 exevent dropC %dropContainerId
 wait 10
 goto _dropLogs
+
+sub resurrect
+set %_resurrectX #charPosX
+set %_resurrectY #charPosY
+_resurrect:
+if ( #charGhost <> yes )
+    return
+msg $home home home$
+wait 10
+if ( #charPosX = %_resurrectX || #charPosY = %_resurrectY )
+    goto _resurrect
+wait %deathTime
+gosub pathfind 5182 1250 0 1
+gosub pathfind 5182 1237 0 1
+gosub pathfind 5182 1228 10 0
+gosub pathfind 5182 1223 40 1
+ignoreItem reset
+_clickResurrectionStone:
+findItem HTG G_1
+if ( #findKind = -1 )
+    pause
+if ( #findCol <> 66 )
+{
+    ignoreItem #findId
+    goto _clickResurrectionStone
+}
+ignoreItem reset
+set #lObjectId #findId
+event macro 17
+gosub waitGump 380 150
+if ( #result = #false )
+    goto _clickResurrectionStone
+click 72 100
+wait 120
+if ( #charGhost = yes )
+    goto _clickResurrectionStone
+event macro 8 1 ; open paperdoll
+event macro 8 2 ; open status
+event macro 8 7 ; open backpack
+wait 20
+move 5194 1229 0 10s
+return
+
+; gosub waitGump width height
+sub waitGump
+set %_waitGumpWidth %1
+set %_waitGumpHeight %2
+set %_waitGumpTimeout #scnt + 5
+_waitGump:
+if ( %_waitGumpTimeout < #scnt )
+    return #false
+if ( #contSizeX = %_waitGumpWidth && #contSizeY = %_waitGumpHeight )
+    return #true
+goto _waitGump
