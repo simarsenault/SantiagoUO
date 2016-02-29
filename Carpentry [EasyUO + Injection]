@@ -1,0 +1,75 @@
+set %containerId OHOAKMD
+
+msg $,automenu 'Carpentry' 'Miscellaneous'$
+wait 20
+msg $,automenu 'Miscellaneous' 'blank scroll'$
+
+loop:
+findItem ZLK C_ , #backPackId
+if ( #findStack < 100 )
+{
+    gosub dropBlankScrolls
+    gosub grabLogs
+}
+findItem EGG C_ , #backPackId
+if ( #findKind = -1 )
+    pause
+set #lObjectId #findId
+event macro 17
+wait 10
+set %journal #jIndex
+set %timeout #scnt + 9
+_craft:
+if ( %timeout < #scnt )
+    goto loop
+if ( %journal = #jIndex )
+    goto _craft
+set %journal %journal + 1
+scanJournal %journal
+if ( you_put in #journal )
+    goto loop
+if ( you_fail in #journal )
+    goto loop
+goto _craft
+
+sub dropBlankScrolls
+findItem MMF C_ , #backPackId
+if ( #findKind = -1 )
+    return
+exevent drag #findId #findStack
+wait 10
+exevent dropC %containerId
+wait 10
+return
+
+sub grabLogs
+gosub openContainer %containerId
+ignoreItem reset
+_grabLogs:
+findItem ZLK C_ , %containerId
+if ( #findCol <> 0 )
+{
+    ignoreItem #findId
+    goto _grabLogs
+}
+if ( #findKind = -1 || #findStack < 500 )
+    pause
+exevent drag #findId 500
+wait 10
+exevent dropC #backPackId
+wait 10
+return
+
+; gosub openContainer [containerId]
+sub openContainer
+set %_containerId %1
+_openContainer:
+set #lObjectId %_containerId
+event macro 17
+set %_timeout #scnt + 10
+_waitOpenContainer:
+if ( %_timeout < #scnt )
+    goto _openContainer
+if ( #contId = %_containerId )
+   return
+goto _openContainer
