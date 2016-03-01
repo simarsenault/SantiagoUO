@@ -1,11 +1,19 @@
 ; Configuration
-set %runebookId TJQDKMD          ; Runebook ID
+if ( #charName = Night )
+{
+    set %runebookId TJQDKMD          ; Runebook ID
+    set %lumberjackSpots 8           ; Number of spots in runebook
+}
+if ( #charName = Dragono )
+{
+    set %runebookId TSNFKMD          ; Runebook ID
+    set %lumberjackSpots 6           ; Number of spots in runebook
+}
 set %dropContainerId XWNAKMD     ; Work container (drop logs, contains recall scroll, hatchets and tinker tool)
 set %area 40                     ; Area to scan
 set %pathfindTimeout 10          ; Maximum time allowed per pathfind (seconds)
 set %maximumPathfindDistance 17  ; Maximum distance to pathFind
 set %smartPathFindTimeout 60     ; Maximum time allowed per smart pathfind (seconds)
-set %lumberjackSpots 8           ; Number of spots in runebook
 set %rechargeRunebook #true      ; Recharge runebook (#true/#false)
 set %maxRunebookCharges 10       ; Maximum charges in runebook
 set %toolsToCraft 10             ; When out of hatchets, amount to craft
