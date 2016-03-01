@@ -265,7 +265,8 @@ gosub dropLogs
 gosub restockTools
 if ( %rechargeRunebook = #true )
     gosub rechargeRunebook
-gosub recall %currentLumberjackSpot
+set %_currentLumberjackSpot %currentLumberjackSpot + 1
+gosub recall %_currentLumberjackSpot
 return
 
 sub restockTools
@@ -448,6 +449,7 @@ gosub pathfind 5182 1250 0 1
 gosub pathfind 5182 1237 0 1
 gosub pathfind 5182 1228 10 0
 gosub pathfind 5182 1223 40 1
+move 5182 1223 1 30s
 ignoreItem reset
 _clickResurrectionStone:
 findItem HTG G_1
