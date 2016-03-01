@@ -18,7 +18,7 @@ set #lObjectId #findId
 event macro 17
 wait 10
 set %journal #jIndex
-set %timeout #scnt + 9
+set %timeout #scnt + 12
 _craft:
 if ( %timeout < #scnt )
     goto loop
