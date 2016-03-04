@@ -1,0 +1,99 @@
+set %containerId OHOAKMD
+set %recharge #false
+
+msg $,automenu 'Spell Circles' 'Fourth Circle'$
+wait 20
+msg $,automenu 'Spell Circle 4' 'Recall'$
+
+loop:
+findItem MMF C_ , #backPackId
+if ( #findKind = -1 )
+    set %recharge #true
+findItem KUF C , #backPackId
+if ( #findKind = -1 )
+    set %recharge #true
+findItem JUF C , #backPackId
+if ( #findKind = -1 )
+    set %recharge #true
+findItem MZF C , #backPackId
+if ( #findKind = -1 )
+    set %recharge #true
+if ( %recharge = #true )
+{
+    gosub dropScrolls
+    gosub recharge
+    set %recharge #false
+}
+event macro 13 23
+wait 80
+goto loop
+
+sub dropScrolls
+findItem WTL C_ , #backPackId
+if ( #findKind = -1 )
+    return
+exevent drag #findId #findStack
+wait 10
+exevent dropC %containerId
+wait 10
+return
+
+sub recharge
+gosub backpackToContainer MMF %containerId
+gosub backpackToContainer KUF %containerId
+gosub backpackToContainer JUF %containerId
+gosub backpackToContainer MZF %containerId
+gosub backpackToContainer WTL %containerId
+gosub openContainer %containerId
+gosub containerToBackpack MMF 100 %containerId
+if ( #result = #false )
+    pause
+gosub containerToBackpack KUF 100 %containerId
+if ( #result = #false )
+    pause
+gosub containerToBackpack JUF 100 %containerId
+if ( #result = #false )
+    pause
+gosub containerToBackpack MZF 100 %containerId
+if ( #result = #false )
+    pause
+return
+
+sub backpackToContainer
+set %_backpackToContainerFindId %1
+set %_backpackToContainerContainerId %2
+findItem %_backpackToContainerFindId C_ , #backPackId
+if ( #findKind = -1 )
+    return
+exevent drag #findId #findStack
+wait 10
+exevent dropC %_backpackToContainerContainerId
+wait 10
+return
+
+sub containerToBackpack
+set %_containerToBackpackFindId %1
+set %_containerToBackpackAmount %2
+set %_containerToBackpackContainerId %3
+findItem %_containerToBackpackFindId C_ , %_containerToBackpackContainerId
+if ( #findKind = -1 || #findStack < %_containerToBackpackAmount )
+    return #false
+exevent drag #findId %_containerToBackpackAmount
+wait 10
+exevent dropC #backPackId
+wait 10
+return #true
+
+; gosub openContainer [containerId]
+sub openContainer
+set %_containerId %1
+_openContainer:
+set #lObjectId %_containerId
+event macro 17
+set %_timeout #scnt + 10
+_waitOpenContainer:
+if ( %_timeout < #scnt )
+    goto _openContainer
+if ( #contId = %_containerId )
+   return
+goto _openContainer
