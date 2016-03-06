@@ -1,26 +1,46 @@
 set %containerId OHOAKMD
+set %craft Flamestrike           ; Recall | Flamestrike
 set %recharge #false
 
-msg $,automenu 'Spell Circles' 'Fourth Circle'$
+if ( %craft = Recall )
+{
+    msg $,automenu 'Spell Circles' 'Fourth Circle'$
+    msg $,automenu 'Spell Circle 4' 'Recall'$
+}
+if ( %craft = Flamestrike )
+{
+    msg $,automenu 'Spell Circles' 'Seventh Circle'$
+    msg $,automenu 'Spell Circle 7' 'Flamestrike'$
+}
 wait 20
-msg $,automenu 'Spell Circle 4' 'Recall'$
 
 loop:
 findItem MMF C_ , #backPackId
-if ( #findKind = -1 )
+if ( #findKind = -1 || #findStack < 10 )
     set %recharge #true
-findItem KUF C , #backPackId
-if ( #findKind = -1 )
-    set %recharge #true
-findItem JUF C , #backPackId
-if ( #findKind = -1 )
-    set %recharge #true
-findItem MZF C , #backPackId
-if ( #findKind = -1 )
-    set %recharge #true
+if ( %craft = Recall )
+{
+    findItem KUF C , #backPackId
+    if ( #findKind = -1 )
+        set %recharge #true
+    findItem JUF C , #backPackId
+    if ( #findKind = -1 )
+        set %recharge #true
+    findItem MZF C , #backPackId
+    if ( #findKind = -1 )
+        set %recharge #true
+}
+if ( %craft = Flamestrike )
+{
+    findItem SZF C , #backPackId
+    if ( #findKind = -1 || #findStack < 10 )
+        set %recharge #true
+    findItem RZF C , #backPackId
+    if ( #findKind = -1 || #findStack < 10 )
+        set %recharge #true
+}
 if ( %recharge = #true )
 {
-    gosub dropScrolls
     gosub recharge
     set %recharge #false
 }
@@ -28,35 +48,46 @@ event macro 13 23
 wait 80
 goto loop
 
-sub dropScrolls
-findItem WTL C_ , #backPackId
-if ( #findKind = -1 )
-    return
-exevent drag #findId #findStack
-wait 10
-exevent dropC %containerId
-wait 10
-return
-
 sub recharge
 gosub backpackToContainer MMF %containerId
-gosub backpackToContainer KUF %containerId
-gosub backpackToContainer JUF %containerId
-gosub backpackToContainer MZF %containerId
-gosub backpackToContainer WTL %containerId
+if ( %craft = Recall )
+{
+    gosub backpackToContainer KUF %containerId
+    gosub backpackToContainer JUF %containerId
+    gosub backpackToContainer MZF %containerId
+    gosub backpackToContainer WTL %containerId
+}
+if ( %craft = Flamestrike )
+{
+    gosub backpackToContainer SZF %containerId
+    gosub backpackToContainer RZF %containerId
+    gosub backpackToContainer NUL %containerId
+}
 gosub openContainer %containerId
 gosub containerToBackpack MMF 100 %containerId
 if ( #result = #false )
     pause
-gosub containerToBackpack KUF 100 %containerId
-if ( #result = #false )
-    pause
-gosub containerToBackpack JUF 100 %containerId
-if ( #result = #false )
-    pause
-gosub containerToBackpack MZF 100 %containerId
-if ( #result = #false )
-    pause
+if ( %craft = Recall )
+{
+    gosub containerToBackpack KUF 100 %containerId
+    if ( #result = #false )
+        pause
+    gosub containerToBackpack JUF 100 %containerId
+    if ( #result = #false )
+        pause
+    gosub containerToBackpack MZF 100 %containerId
+    if ( #result = #false )
+        pause
+}
+if ( %craft = Flamestrike )
+{
+    gosub containerToBackpack SZF 100 %containerId
+    if ( #result = #false )
+        pause
+    gosub containerToBackpack RZF 100 %containerId
+    if ( #result = #false )
+        pause
+}
 return
 
 sub backpackToContainer
