@@ -27,7 +27,7 @@ set %smartPathFindTimeout 60     ; Maximum time allowed per smart pathfind (seco
 set %pathfindTimeout 10          ; Maximum time allowed per pathfind (seconds)
 set %miningTimeout 8             ; Maximum time allowed per mining stroke (seconds)
 set %nodeMaximumTries 3          ; Maximum failed attempts per mining node before going to the next
-set %deathTime 6000              ; Time to wait before resurrecting (20 = 1 second)
+set %deathTimer 5                ; Time to wait before resurrecting (minutes)
 set %searchForgeDistance 8       ; Maximum distance forge will be from recall location
 
 ; Constants
@@ -88,6 +88,7 @@ set %mineChanged #false
 for %miningLoop 1 %spots
 {
     _miningLoop:
+    gosub updateStatisticsMenu
     set %mineX %spotX . %miningLoop
     set %mineY %spotY . %miningLoop
     set %mineZ %spotZ . %miningLoop
@@ -109,8 +110,6 @@ for %miningLoop 1 %spots
                 {
                     if ( %_loopX = %mineX && %_loopY = %mineY )
                         continue
-
-                    gosub updateStatisticsMenu
 
                     gosub isLocationMineable %_loopX %_loopY
                     if ( #result = #true )
@@ -727,6 +726,7 @@ goto _openContainer
 sub resurrect
 set %_resurrectX #charPosX
 set %_resurrectY #charPosY
+set %_resurrectTimer #scnt + %deathTimer
 _resurrect:
 if ( #charGhost <> yes )
     return
@@ -734,16 +734,19 @@ msg $home home home$
 wait 10
 if ( #charPosX = %_resurrectX || #charPosY = %_resurrectY )
     goto _resurrect
-wait %deathTime
+_resurrectTimer:
+if ( %_resurrectTimer < #scnt )
+    goto _resurrectTimer
 gosub pathfind 5182 1250 0 1
 gosub pathfind 5182 1237 0 1
 gosub pathfind 5182 1228 10 0
 gosub pathfind 5182 1223 40 1
+move 5182 1223 1 30s
 ignoreItem reset
 _clickResurrectionStone:
 findItem HTG G_1
 if ( #findKind = -1 )
-    pause
+    goto _resurrect
 if ( #findCol <> 66 )
 {
     ignoreItem #findId
