@@ -26,13 +26,17 @@ wait 80
 goto loop
 
 sub trashBandanas
+set %_trashedBandanas 0
 _trashBandanas:
 findItem TDI C_ , #backPackId
 if ( #findKind = -1 )
-    goto _emptyTrash
+    return
 exevent drag #findId 1
 exevent dropC %trashCanId
 wait 10
+set %_trashedBandanas %_trashedBandanas + 1
+if ( %_trashedBandanas >= 10 )
+    goto _emptyTrash
 goto _trashBandanas
 _emptyTrash:
 set #lTargetId %trashCanId
@@ -40,13 +44,14 @@ set #lTargetKind 1
 msg $take out the trash$
 target
 event macro 22
-return
+set %_trashedBandanas 0
+goto _trashBandanas
 
 sub recharge
 findItem RTI C_ , %containerId
-if ( #findKind = -1 || #findStack < 500 )
+if ( #findKind = -1 || #findStack < 300 )
     pause
-exevent drag #findId 500
+exevent drag #findId 300
 exevent dropC #backPackId
 wait 10
 return
