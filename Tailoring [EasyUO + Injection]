@@ -1,22 +1,26 @@
 set %containerId OHOAKMD
 set %trashCanId CNYZJMD
 
+set %sewingKit HAG
+set %foldedCloth RTI
+set %bandana TDI
+
 msg $,automenu 'Cloth' 'Headwear'$
 msg $,automenu 'Headwear' 'bandana'$
 
 loop:
-findItem RTI C_ , #backPackId
+findItem %foldedCloth C_ , #backPackId
 if ( #findKind = -1 || #findStack < 100 )
 {
     gosub trashBandanas
     gosub openContainer %containerId
     gosub recharge
 }
-findItem HAG C_ , #backPackId
+findItem %sewingKit C_ , #backPackId
 if ( #findKind = -1 )
     pause
 set #lObjectId #findId
-findItem RTI C_ , #backPackId
+findItem %foldedCloth C_ , #backPackId
 set #lTargetId #findId
 set #lTargetKind 1
 event macro 17
@@ -28,7 +32,7 @@ goto loop
 sub trashBandanas
 set %_trashedBandanas 0
 _trashBandanas:
-findItem TDI C_ , #backPackId
+findItem %bandana C_ , #backPackId
 if ( #findKind = -1 )
     return
 exevent drag #findId 1
@@ -48,7 +52,7 @@ set %_trashedBandanas 0
 goto _trashBandanas
 
 sub recharge
-findItem RTI C_ , %containerId
+findItem %foldedCloth C_ , %containerId
 if ( #findKind = -1 || #findStack < 300 )
     pause
 exevent drag #findId 300
