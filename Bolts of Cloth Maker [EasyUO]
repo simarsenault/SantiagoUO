@@ -1,0 +1,138 @@
+set %bankStoneId CCUSJMD
+set %itemStoneId DGUSJMD
+
+set %itemStoneWoolCost 2000
+
+set %wool OFF
+set %spinningWheel XEG
+set %yarn NLF
+set %loom IDG
+set %gold POF
+set %boltsOfCloth ZZF
+set %closedDoor ZPC
+
+loop:
+gosub moveWithoutTimeout 1417 1697
+gosub recharge
+gosub moveWithoutTimeout 1471 1697
+gosub openDoor
+gosub moveWithoutTimeout 1471 1688
+gosub moveWithoutTimeout 1474 1688
+gosub woolToYarn
+move 1473 1686 0
+gosub yarnToBoltOfCloth
+gosub moveWithoutTimeout 1471 1694
+gosub openDoor
+gosub moveWithoutTimeout 1471 1697
+goto loop
+
+sub openDoor
+findItem %closedDoor G_2
+if ( #findKind <> -1 )
+{
+    set #lObjectId #findId
+    event macro 17
+}
+return
+
+sub recharge
+gosub openBank
+gosub findItemContainer #backPackId %boltsOfCloth -1
+if ( #result = #false )
+    pause
+exevent drag #findId #findStack
+exevent dropC #contId 50 50
+wait 10
+gosub findItemContainer #contId %gold %itemStoneWoolCost
+if ( #result = #false )
+    pause
+exevent drag #findId %itemStoneWoolCost
+exevent dropC #backPackId
+wait 10
+_openItemStone:
+set #lObjectId %itemStoneId
+event macro 17
+gosub waitGump 300 491
+click 56 329
+return
+
+sub openBank
+_openBankStone:
+set #lObjectId %bankStoneId
+event macro 17
+gosub waitGump 420 300
+if ( #result = #false )
+    goto _openBankStone
+click 250 117
+gosub waitGump 180 240
+if ( #result = #false )
+    goto _openBankStone
+return
+
+sub woolToYarn
+_woolToYarn:
+findItem %wool C_ , #backPackId
+if ( #findKind = -1 )
+    return
+set #lObjectId #findId
+findItem %spinningWheel G_2
+if ( #findKind = -1 )
+    goto _woolToYarn
+set #lTargetId #findId
+set #lTargetKind 1
+event macro 17
+target
+event macro 22
+goto _woolToYarn
+
+sub yarnToBoltOfCloth
+_yarnToBoltOfCloth:
+findItem %yarn C_ , #backPackId
+if ( #findKind = -1 )
+    return
+set #lObjectId #findId
+findItem %loom G_2
+if ( #findKind = -1 )
+    pause
+set #lTargetId #findId
+set #lTargetKind 1
+event macro 17
+target
+event macro 22
+goto _yarnToBoltOfCloth
+
+sub waitGump
+set %_waitGumpWidth %1
+set %_waitGumpHeight %2
+set %_waitGumpTimeout #scnt + 10
+_waitGump:
+if ( %_waitGumpTimeout < #scnt )
+    return #false
+if ( #contSizeX = %_waitGumpWidth && #contSizeY = %_waitGumpHeight )
+    return #true
+goto _waitGump
+
+sub findItemContainer
+set %_findItemContainerContainerId %1
+set %_findItemContainerItemId %2
+set %_findItemContainerAmount %3
+ignoreItem reset 1
+_findItemContainer:
+findItem %_findItemContainerItemId C_ , %_findItemContainerContainerId
+if ( #findKind = -1 )
+    return #false
+if ( %_findItemContainerAmount > 0 && #findStack < %_findItemContainerAmount )
+{
+    ignoreItem #findId 1
+    goto _findItemContainer
+}
+return #true
+
+sub moveWithoutTimeout
+set %_moveWithoutTimeoutX %1
+set %_moveWithoutTimeoutY %2
+while ( #charPosX <> %_moveWithoutTimeoutX || #charPosY <> %_moveWithoutTimeoutY )
+{
+    move %_moveWithoutTimeoutX %_moveWithoutTimeoutY 0 10s
+}
+return
