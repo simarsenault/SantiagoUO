@@ -1,0 +1,110 @@
+set %housePartsContainerId TBOAKMD
+set %resourcesContainerId XWNAKMD
+set %housePartsNeeded 225
+
+set %housePart UYF
+set %jointingPlane IGG
+
+msg $,automenu 'Carpentry' 'house part'$
+msg $,automenu 'Craftable House' 'house part'$
+wait 20
+
+loop:
+gosub dropHouseParts
+gosub openContainer %housePartsContainerId
+gosub getHousePartsCount
+if ( #result >= %housePartsNeeded )
+    halt
+gosub openContainer %resourcesContainerId
+gosub recharge RMK 0 300
+gosub recharge RMK 2103 300
+gosub recharge ZLK 0 300
+gosub craft
+goto loop
+
+sub getHousePartsCount
+findItem %housePart C_ , %housePartsContainerId
+if ( #findKind = -1 )
+    return 0
+return #findCnt
+
+sub dropHouseParts
+ignoreItem reset
+_dropHouseParts:
+findItem %housePart C_ , #backPackId
+if ( #findKind = -1 )
+    return
+exevent drag #findId 1
+exevent dropC %housePartsContainerId
+ignoreItem #findId
+wait 10
+goto _dropHouseParts
+
+sub recharge
+set %_rechargeItemType %1
+set %_rechargeItemColor %2
+set %_rechargeAmount %3
+ignoreItem reset
+_recharge:
+findItem %_rechargeItemType C_ , #backPackId
+if ( #findKind <> -1 && #findCol <> %_rechargeItemColor )
+{
+    ignoreItem #findId
+    goto _recharge
+}
+set %_rechargeAmount %_rechargeAmount - #findStack
+if ( %_rechargeAmount <= 0 )
+    return
+_rechargeFindResourcesContainer:
+findItem %_rechargeItemType C_ , %resourcesContainerId
+if ( #findKind = -1 )
+    pause
+if ( #findCol <> %_rechargeItemColor )
+{
+    ignoreItem #findId
+    goto _rechargeFindResourcesContainer
+}
+exevent drag #findId %_rechargeAmount
+exevent dropC #backPackId
+wait 10
+if ( #findStack < %_rechargeAmount )
+{
+    set %_rechargeAmount %_rechargeAmount - #findStack
+    goto _rechargeFindResourcesContainer
+}
+return
+
+sub craft
+findItem %jointingPlane C_ , #backPackId
+if ( #findKind = -1 )
+    pause
+set #lObjectId #findId
+event macro 17
+set %journal #jIndex
+set %timeout #scnt + 12
+_craft:
+if ( %timeout < #scnt )
+    return
+if ( %journal = #jIndex )
+    goto _craft
+set %journal %journal + 1
+scanJournal %journal
+if ( you_put in #journal )
+    return
+if ( you_fail in #journal )
+    return
+goto _craft
+
+; gosub openContainer [containerId]
+sub openContainer
+set %_containerId %1
+_openContainer:
+set #lObjectId %_containerId
+event macro 17
+set %_timeout #scnt + 10
+_waitOpenContainer:
+if ( %_timeout < #scnt )
+    goto _openContainer
+if ( #contId = %_containerId )
+   return
+goto _openContainer
