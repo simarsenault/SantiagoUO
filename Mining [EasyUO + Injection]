@@ -21,7 +21,6 @@ set %miningToolsRecharge 4       ; Amount of mining tools to have before going b
 set %rechargeRunebook #true      ; Recharge runebook (#true/#false)
 set %maxRunebookCharges 10       ; Maximum charges in runebook
 set %miningToolsToCraft 10       ; When out of pickaxes, amount to craft
-set %mineArea 40                 ; Area to scan for minable tiles around forge
 set %maximumPathfindDistance 17  ; Maximum distance to pathFind
 set %smartPathFindTimeout 60     ; Maximum time allowed per smart pathfind (seconds)
 set %pathfindTimeout 10          ; Maximum time allowed per pathfind (seconds)
@@ -521,34 +520,34 @@ return #findStack
 
 ; gosub recall [rune]
 sub recall
-set %_rune %1
-if ( %_rune <= 8 )
+set %_recallRune %1
+if ( %_recallRune <= 8 ) ; First page
 {
-    set %_runeX 85
-    set %_runeY 115 + ( ( %_rune - 1 ) * 14 )
+    set %_recallRuneX 85
+    set %_recallRuneY 115 + ( ( %_recallRune - 1 ) * 14 )
 }
-else
+else ; Second page
 {
-    set %_runeX 245
-    set %_runeY 115 + ( ( %_rune - 9 ) * 14 )
+    set %_recallRuneX 245
+    set %_recallRuneY 115 + ( ( %_recallRune - 9 ) * 14 )
 }
-set %_charPosX #charPosX
-set %_charPosY #charPosY
+set %_recallCharPosX #charPosX
+set %_recallCharPosY #charPosY
 _openRunebook:
-set %_openRunebook #scnt + 10
+set %_recallTimeout #scnt + 10
 set #lObjectId %runebookId
 event macro 17
 _waitOpenRunebook:
-if ( %_openRunebook < #scnt )
+if ( %_recallTimeout < #scnt )
    goto _openRunebook
 if ( #contSizeX <> 352 || #contSizeY <> 226 )
    goto _waitOpenRunebook
-set %_recall #scnt + 10
-click %_runeX %_runeY
+set %_recallTimeout #scnt + 10
+click %_recallRuneX %_recallRuneY
 _waitRecall:
-if ( %_recall < #scnt )
+if ( %_recallTimeout < #scnt )
     goto _openRunebook
-if ( #charPosX <> %_charPosX || #charPosY <> %_charPosY )
+if ( #charPosX <> %_recallCharPosX || #charPosY <> %_recallCharPosY )
     return
 goto _waitRecall
 
@@ -595,7 +594,7 @@ if ( #findType = RMK && #findCol = 1218 )
 if ( #findType = RMK && #findCol = 1908 )
     set %blackrockCollected %blackrockCollected + #findStack
 if ( #findType = RMK && #findCol = 1153 )
-    set %platinumCollected %platinumCollected #findStack
+    set %platinumCollected %platinumCollected + #findStack
 ignoreitem #findid
 exevent drag #findId #findStack
 wait 10
@@ -735,7 +734,7 @@ wait 10
 if ( #charPosX = %_resurrectX || #charPosY = %_resurrectY )
     goto _resurrect
 _resurrectTimer:
-if ( %_resurrectTimer < #scnt )
+if ( %_resurrectTimer >= #scnt )
     goto _resurrectTimer
 gosub pathfind 5182 1250 0 1
 gosub pathfind 5182 1237 0 1
@@ -766,7 +765,7 @@ event macro 8 1 ; open paperdoll
 event macro 8 2 ; open status
 event macro 8 7 ; open backpack
 wait 20
-move 5194 1229 0 10s
+move 5194 1229 0 20s
 return
 
 ; gosub waitGump width height
