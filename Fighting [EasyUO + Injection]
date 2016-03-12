@@ -1,6 +1,10 @@
 set %containerId NHOAKMD
 set %weaponType TSF ; TSF = dagger
-set %creatureType UF
+set %kickOutHits 20
+
+set %alligator UF
+set %grizzlyBear WF
+set %creatureType %alligator , _ , %grizzlyBear
 
 set %waterTrough VEE_QEE
 set %bloodyBandages AMF
@@ -9,20 +13,20 @@ set %bloodMoss JUF
 set %mandrakeRoot MZF
 set %bandages ZLF
 
-msg $,automenu 'What do you want to summon ?' 'Crocodile'$
+msg $,automenu 'What do you want to summon ?' 'Grizzly Bear'$
 gosub openContainer %containerId
 gosub restockFromContainer %containerId %bandages 10
 gosub restockFromContainer %containerId %weaponType 1
 
 loop:
-gosub openContainer %containerId
-gosub restockFromContainer %containerId %spiderSilk 1
-gosub restockFromContainer %containerId %bloodMoss 1
-gosub restockFromContainer %containerId %mandrakeRoot 1
 gosub cleanBandages
 gosub heal
 event macro 6
 gosub meditate
+gosub openContainer %containerId
+gosub restockFromContainer %containerId %spiderSilk 1
+gosub restockFromContainer %containerId %bloodMoss 1
+gosub restockFromContainer %containerId %mandrakeRoot 1
 gosub summon
 gosub equipWeapon
 gosub attack
@@ -130,6 +134,15 @@ _attack:
 findItem %creatureType G_1
 if ( #findKind = -1 )
     return
+if ( #hits <= %kickOutHits )
+{
+    set #lTargetId #findId
+    set #lTargetKind 1
+    msg $kick out$
+    target 6s
+    event macro 22
+    goto _attack
+}
 if ( %_attack <= #scnt )
 {
     set #lTargetId #findId
