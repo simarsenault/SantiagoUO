@@ -21,6 +21,8 @@ gosub restockFromContainer %containerId %bloodMoss 1
 gosub restockFromContainer %containerId %mandrakeRoot 1
 gosub cleanBandages
 gosub heal
+event macro 6
+gosub meditate
 gosub summon
 gosub equipWeapon
 gosub attack
@@ -135,3 +137,22 @@ if ( %_attack <= #scnt )
     set %_attack #scnt + 3
 }
 goto _attack
+
+sub meditate
+_meditate:
+if ( #mana >= 100 )
+    return
+set %_meditateJournal #jIndex
+event macro 13 46
+_meditationJournal:
+if ( #mana >= 100 )
+    return
+if ( #jIndex <= %_meditateJournal )
+    goto _meditationJournal
+set %_meditateJournal %_meditateJournal + 1
+scanJournal %_meditateJournal
+if ( you_are_at_peace in #journal )
+    return
+if ( you_lose_your_concentration in #journal )
+    goto _meditate
+goto _meditationJournal
