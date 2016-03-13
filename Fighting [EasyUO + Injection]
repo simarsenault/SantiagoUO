@@ -4,7 +4,7 @@ set %kickOutHits 20
 
 set %alligator UF
 set %grizzlyBear WF
-set %creatureType %alligator , _ , %grizzlyBear
+set %creatureTypes %alligator , _ , %grizzlyBear
 
 set %waterTrough VEE_QEE
 set %bloodyBandages AMF
@@ -12,23 +12,38 @@ set %spiderSilk RZF
 set %bloodMoss JUF
 set %mandrakeRoot MZF
 set %bandages ZLF
+set %shields GIK
 
 msg $,automenu 'What do you want to summon ?' 'Grizzly Bear'$
 gosub openContainer %containerId
-gosub restockFromContainer %containerId %bandages 10
-gosub restockFromContainer %containerId %weaponType 1
-
+findItem %bandages C_ , #backPackId
+if ( #findKind = -1 || #findStack < 15 )
+    gosub restockFromContainer %containerId %bandages 15
+    
 loop:
+gosub openContainer %containerId
+findItem %weaponType C_ , #backPackId
+if ( #findKind = -1 )
+    gosub restockFromContainer %containerId %weaponType 1
+findItem %shields C_ , #charId
+if ( #findKind = -1 )
+    gosub restockFromContainer %containerId %shields 1
+findItem %spiderSilk C_ , #backPackId
+if ( #findKind = -1 )
+    gosub restockFromContainer %containerId %spiderSilk 10
+findItem %bloodMoss C_ , #backPackId
+if ( #findKind = -1 )
+    gosub restockFromContainer %containerId %bloodMoss 10
+findItem %mandrakeRoot C_ , #backPackId
+if ( #findKind = -1 )
+    gosub restockFromContainer %containerId %mandrakeRoot 10
 gosub cleanBandages
 gosub heal
 event macro 6
 gosub meditate
-gosub openContainer %containerId
-gosub restockFromContainer %containerId %spiderSilk 1
-gosub restockFromContainer %containerId %bloodMoss 1
-gosub restockFromContainer %containerId %mandrakeRoot 1
 gosub summon
-gosub equipWeapon
+gosub equip %weaponType
+gosub equip %shields
 gosub attack
 goto loop
 
@@ -114,13 +129,14 @@ set %_summonTimeout #scnt + 10
 _summonTimeout:
 if ( %_summonTimeout < #scnt )
     goto _summon
-findItem %creatureType G_1
+findItem %creatureTypes G_1
 if ( #findKind = -1 )
     goto _summonTimeout
 return
 
-sub equipWeapon
-findItem %weaponType C_ , #backPackId
+sub equip
+set %_equipId %1
+findItem %_equipId C_ , #backPackId
 if ( #findKind = -1 )
     return #false
 exevent drag #findId 1
@@ -131,7 +147,7 @@ return #true
 sub attack
 set %_attack #scnt
 _attack:
-findItem %creatureType G_1
+findItem %creatureTypes G_1
 if ( #findKind = -1 )
     return
 if ( #hits <= %kickOutHits )
