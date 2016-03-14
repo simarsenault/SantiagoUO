@@ -43,6 +43,7 @@ set %oresIngots %ores , _ , %ingots
 set %recallScrolls WTL
 set %pathFindMineSpotTolerance 0
 set %pathFindForgeTolerance 1
+set %treasureBalls DMF
 
 ; Stats
 set %ironCollected 0
@@ -554,6 +555,7 @@ goto _waitRecall
 sub bank
 gosub recall 1
 gosub dropIngotsOres
+gosub dropTreasureBalls
 gosub restockMiningTools
 if ( %rechargeRunebook = #true )
     gosub rechargeRunebook
@@ -597,10 +599,20 @@ if ( #findType = RMK && #findCol = 1153 )
     set %platinumCollected %platinumCollected + #findStack
 ignoreitem #findid
 exevent drag #findId #findStack
-wait 10
 exevent dropc %dropContainerId
 wait 10
 goto _dropIngotsOres
+
+sub dropTreasureBalls
+ignoreItem reset
+_dropTreasureBalls:
+findItem %treasureBalls C_ , #backPackId
+if ( #findKind = -1 )
+    return
+exevent drag #findId 1
+exevent dropC %dropContainerId
+wait 10
+goto _dropTreasureBalls
 
 sub restockMiningTools
 ignoreItem reset
@@ -725,7 +737,7 @@ goto _openContainer
 sub resurrect
 set %_resurrectX #charPosX
 set %_resurrectY #charPosY
-set %_resurrectTimer #scnt + %deathTimer
+set %_resurrectTimer #scnt + ( %deathTimer * 60 )
 _resurrect:
 if ( #charGhost <> yes )
     return
