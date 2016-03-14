@@ -24,6 +24,7 @@ set %deathTime 2400              ; Time to wait before resurrecting (20 = 1 seco
 set %tools FSF_ASF
 set %tinkeringTools GTL
 set %recallScrolls WTL
+set %treasureBalls DMF
 
 ; Stats
 set %recallScrollsUsed 0
@@ -262,6 +263,7 @@ goto _lumberjackJournal
 sub bank
 gosub recall 1
 gosub dropLogs
+gosub dropTreasureBalls
 gosub restockTools
 if ( %rechargeRunebook = #true )
     gosub rechargeRunebook
@@ -288,7 +290,6 @@ for %_loop 1 %toolsToGrab
 {
     findItem %tools C_ , %dropContainerId
     exevent drag #findId
-    wait 10
     exevent dropC #backPackId
     wait 10
 }
@@ -301,7 +302,6 @@ findItem %tinkeringTools C_ , %dropContainerId
 if ( #findKind = -1 )
     pause
 exevent drag #findId 1
-wait 10
 exevent dropC #backPackId
 wait 10
 _findIronIngots:
@@ -315,7 +315,6 @@ if ( #findCol <> 0 )
 }
 set %_ironAmount %ironRequiredTool * %toolsToCraft
 exevent drag #findId %_ironAmount
-wait 10
 exevent dropC #backPackId
 wait 10
 ignoreItem reset
@@ -338,7 +337,6 @@ _dropTinkeringTools:
 ignoreItem reset
 findItem %tinkeringTools C_ , #backPackId
 exevent drag #findId 1
-wait 10
 exevent dropC %dropContainerId
 wait 10
 _dropTools:
@@ -346,7 +344,6 @@ findItem %tools C_ , #backPackId
 if ( #findKind = -1 )
     return
 exevent drag #findId 1
-wait 10
 exevent dropC %dropContainerId 50 50
 wait 10
 goto _dropTools
@@ -397,13 +394,11 @@ if ( #findCol <> 0 )
     goto rechargeRunebook
 }
 exevent drag #findId %maxRunebookCharges
-wait 10
 exevent dropC %runebookId
 wait 10
 findItem %recallScrolls C_ , #backPackId
 set %recallScrollsUsed %recallScrollsUsed + ( %maxRunebookCharges - #findStack )
 exevent drag #findId #findStack
-wait 10
 exevent dropC %dropContainerId
 wait 10
 return
@@ -429,10 +424,20 @@ findItem ZLK_RMK C_ , #backPackId
 if ( #findKind = -1 )
     return
 exevent drag #findId #findStack
-wait 10
 exevent dropC %dropContainerId
 wait 10
 goto _dropLogs
+
+sub dropTreasureBalls
+ignoreItem reset
+_dropTreasureBalls:
+findItem %treasureBalls C_ , #backPackId
+if ( #findKind = -1 )
+    return
+exevent drag #findId 1
+exevent dropC %dropContainerId
+wait 10
+goto _dropTreasureBalls
 
 sub resurrect
 set %_resurrectX #charPosX
