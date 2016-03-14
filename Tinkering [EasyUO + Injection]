@@ -1,4 +1,7 @@
-set %containerId OHOAKMD
+set %containerId TOEAKMD
+
+msg $,automenu 'Tinkering' 'Tools'$
+msg $,automenu 'Tools' 'empty bottle'$
 
 loop:
 findItem RMK C_ , #backPackId
@@ -11,7 +14,6 @@ findItem GTL C_ , #backPackId
 if ( #findKind = -1 )
     pause
 set #lObjectId #findId
-msg $,waitmenu 'Tinkering' 'Tools' 'Tools' 'empty bottle'$
 event macro 17
 wait 80
 goto loop
