@@ -1,0 +1,25 @@
+loop:
+onhotkey F8
+    gosub loot
+onhotkey F12
+    gosub bandage
+goto loop:
+
+sub loot
+findItem * C_ , #contId
+if ( #findKind = -1 )
+    return
+exevent drag #findId #findStack
+exevent dropC #backPackId
+wait 10
+return
+
+sub bandage
+findItem ZLF C_
+if ( #findKind = -1 )
+    return
+set #lObjectId #findId
+event macro 17
+target
+event macro 23
+return
