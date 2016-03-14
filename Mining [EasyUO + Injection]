@@ -489,9 +489,8 @@ if ( #findKind = -1 )
     return
 ignoreitem #findId
 exevent drag #findId 1
-wait 5
 exevent dropc #backpackid 80 80
-wait 5
+wait 10
 goto _seperateOres
 
 sub isBankingRequired
@@ -633,7 +632,6 @@ for %_loop 1 %miningToolsToGrab
 {
     findItem %miningTools C_ , %dropContainerId
     exevent drag #findId
-    wait 10
     exevent dropC #backPackId
     wait 10
 }
@@ -646,7 +644,6 @@ findItem %tinkeringTools C_ , %dropContainerId
 if ( #findKind = -1 )
     pause
 exevent drag #findId 1
-wait 10
 exevent dropC #backPackId
 wait 10
 _findIronIngots:
@@ -660,7 +657,6 @@ if ( #findCol <> 0 )
 }
 set %_ironAmount %ironRequiredMiningTool * %miningToolsToCraft
 exevent drag #findId %_ironAmount
-wait 10
 exevent dropC #backPackId
 wait 10
 ignoreItem reset
@@ -683,7 +679,6 @@ _dropTinkeringTools:
 ignoreItem reset
 findItem %tinkeringTools C_ , #backPackId
 exevent drag #findId 1
-wait 10
 exevent dropC %dropContainerId
 wait 10
 _dropMiningTools:
@@ -691,7 +686,6 @@ findItem %miningTools C_ , #backPackId
 if ( #findKind = -1 )
     return
 exevent drag #findId 1
-wait 10
 exevent dropC %dropContainerId 50 50
 wait 10
 goto _dropMiningTools
@@ -709,13 +703,11 @@ if ( #findCol <> 0 )
     goto rechargeRunebook
 }
 exevent drag #findId %maxRunebookCharges
-wait 10
 exevent dropC %runebookId
 wait 10
 findItem %recallScrolls C_ , #backPackId
 set %recallScrollsUsed %recallScrollsUsed + ( %maxRunebookCharges - #findStack )
 exevent drag #findId #findStack
-wait 10
 exevent dropC %dropContainerId
 wait 10
 return
