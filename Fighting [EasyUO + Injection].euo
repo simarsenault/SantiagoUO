@@ -1,6 +1,7 @@
 set %containerId NHOAKMD
+set %wrestling #true
 set %weaponType TSF ; TSF = dagger
-set %kickOutHits 20
+set %kickOutHits 40
 
 set %alligator UF
 set %grizzlyBear WF
@@ -12,9 +13,11 @@ set %spiderSilk RZF
 set %bloodMoss JUF
 set %mandrakeRoot MZF
 set %bandages ZLF
-set %shields GIK
+set %shields GIK_NIK_CIK
 
+msg $,waitmenu 'What do you want to summon ?' 'Grizzly Bear'$
 msg $,automenu 'What do you want to summon ?' 'Grizzly Bear'$
+
 gosub openContainer %containerId
 findItem %bandages C_ , #backPackId
 if ( #findKind = -1 || #findStack < 15 )
@@ -22,9 +25,12 @@ if ( #findKind = -1 || #findStack < 15 )
     
 loop:
 gosub openContainer %containerId
-findItem %weaponType C_ , #backPackId
-if ( #findKind = -1 )
-    gosub restockFromContainer %containerId %weaponType 1
+if ( %wrestling = #false )
+{
+    findItem %weaponType C_ , #backPackId
+    if ( #findKind = -1 )
+        gosub restockFromContainer %containerId %weaponType 1
+}
 findItem %shields C_ , #charId
 if ( #findKind = -1 )
     gosub restockFromContainer %containerId %shields 1
@@ -42,7 +48,8 @@ gosub heal
 event macro 6
 gosub meditate
 gosub summon
-gosub equip %weaponType
+if ( %wrestling = #false )
+    gosub equip %weaponType
 gosub equip %shields
 gosub attack
 goto loop
