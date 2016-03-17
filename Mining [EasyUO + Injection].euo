@@ -47,7 +47,7 @@ set %pathFindMineSpotTolerance 0
 set %pathFindForgeTolerance 1
 set %treasureBalls DMF
 set %humans IS_HS
-set %minerKillersId XVZM_GIXL         ; Jason Voorhees, Rukk
+set %minerKillersId XVZM         ; Jason Voorhees
 
 ; Stats
 set %ironCollected 0
