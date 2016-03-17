@@ -138,7 +138,7 @@ for %miningLoop 1 %spots
                     if ( %mustBank = #true )
                     {
                         set %percentDone %spotsMined * 100 / %spots
-                        if ( %percentDone >= %percentSwitchMine )
+                        if ( %percentDone >= %percentSwitchMine || %emergencyBanking = #true )
                             goto switchMine
                         goto skipMine
                     }
