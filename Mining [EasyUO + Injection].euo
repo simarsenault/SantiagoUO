@@ -160,6 +160,7 @@ if ( %emergencyBanking = #false )
 }
 if ( #charGhost = yes )
 {
+    gosub updateLastDeathValues
     set %deaths %deaths + 1
     gosub resurrect
 }
@@ -808,6 +809,31 @@ if ( #contId = %_containerId )
    return
 goto _openContainer
 
+sub updateLastDeathValues
+ignoreItem reset
+ignoreItem #charId
+set *miningLastDeathPlayerAround ---
+_miningLastDeathPlayerAround:
+findItem %humans
+if ( #findKind = -1 )
+    goto _miningLastDeathJournal
+if ( *miningLastDeathPlayerAround = --- )
+    set *miningLastDeathPlayerAround #findId
+else
+    set *miningLastDeathPlayerAround *miningLastDeathPlayerAround , _ , #findId
+ignoreItem #findId
+goto _miningLastDeathPlayerAround
+_miningLastDeathJournal:
+set %_miningLastDeathJournalCounter 15
+set %_miningLastDeathJournalIndexEnd #jIndex - 15
+for %_miningLastDeathJournalIndex #jIndex %_miningLastDeathJournalIndexEnd
+{
+    scanJournal %_miningLastDeathJournalIndex
+    set *miningLastDeathJournal . %_miningLastDeathJournalCounter #journal
+    set %_miningLastDeathJournalCounter %_miningLastDeathJournalCounter - 1
+}
+return
+
 sub resurrect
 set %_resurrectX #charPosX
 set %_resurrectY #charPosY
@@ -902,83 +928,111 @@ linesPerCycle 1000
 menu clear
 menu window title Rukk's Mining Script
 menu window color black
-menu window size 500 270
+menu window size 750 300
 menu font bgcolor black
 menu font color lime
 menu font style b
 menu font size 14
-menu text lblTitle 150 5 Rukk's Mining Script
+menu text lblTitle 275 5 Rukk's Mining Script
+
+menu font size 14
+menu font color purple
+menu text lblStatistics 10 40 Statistics
+menu text lblLastDeathInformations 500 40 Last's Death
 
 menu font color white
 menu font style b
 menu font size 12
-menu text lblCharName 10 40 Character:
-menu text lblDeaths 300 40 Deaths:
-menu text lblCurrentMine 10 60 Mine:
-menu text lblTotalMines 300 60 Invis. potions:
-menu text lblCurrentMineProgress 10 80 Current mine progress:
-menu text lblPickaxes 300 80 Pickaxes:
-menu text lblRecallScrolls 10 100 Recall scrolls:
-menu text lblEstimatedNetProfit 300 100 Est. Net Profit:
-menu text lblRunTime 10 120 Run time:
+menu text lblCharName 10 70 Character:
+menu text lblDeaths 300 70 Deaths:
+menu text lblCurrentMine 10 90 Mine:
+menu text lblTotalMines 300 90 Invis. potions:
+menu text lblCurrentMineProgress 10 110 Current mine progress:
+menu text lblPickaxes 300 110 Pickaxes:
+menu text lblRecallScrolls 10 130 Recall scrolls:
+menu text lblEstimatedNetProfit 300 130 Est. Net Profit:
+menu text lblRunTime 10 150 Run time:
+menu text lblLastDeathPlayersNear 500 70 Players' ID around:
+menu text lblLastDeathJournal 500 110 Journal:
 
-menu text lblIron 10 160 Iron:
-menu text lblStone 130 160 Stone:
-menu text lblCopper 250 160 Copper:
-menu text lblAgapite 370 160 Agapite:
-menu text lblSilver 10 180 Silver:
-menu text lblShadow 130 180 Shadow:
-menu text lblGold 250 180 Gold:
-menu text lblRose 370 180 Rose:
-menu text lblValorite 10 200 Valorite:
-menu text lblVerite 130 200 Verite:
-menu text lblMytheril 250 200 Mytheril:
-menu text lblBloodrock 370 200 Bloodrock:
-menu text lblBlackrock 10 220 Blackrock:
-menu text lblPlatinum 130 220 Platinum:
-menu text lblCarbonPolymer 250 220 Carbon:
-menu text lblKevlar 370 220 Kevlar:
-menu text lblDelta 10 240 Delta:
-menu text lblLiquid 130 240 Liquid:
-menu text lblRagnarok 250 240 Ragnarok:
-menu text lblTotal 370 240 TOTAL:
+menu text lblIron 10 190 Iron:
+menu text lblStone 130 190 Stone:
+menu text lblCopper 250 190 Copper:
+menu text lblAgapite 370 190 Agapite:
+menu text lblSilver 10 210 Silver:
+menu text lblShadow 130 210 Shadow:
+menu text lblGold 250 210 Gold:
+menu text lblRose 370 210 Rose:
+menu text lblValorite 10 230 Valorite:
+menu text lblVerite 130 230 Verite:
+menu text lblMytheril 250 230 Mytheril:
+menu text lblBloodrock 370 230 Bloodrock:
+menu text lblBlackrock 10 250 Blackrock:
+menu text lblPlatinum 130 250 Platinum:
+menu text lblCarbonPolymer 250 250 Carbon:
+menu text lblKevlar 370 250 Kevlar:
+menu text lblDelta 10 270 Delta:
+menu text lblLiquid 130 270 Liquid:
+menu text lblRagnarok 250 270 Ragnarok:
+menu text lblTotal 370 270 TOTAL:
 
 menu font style
 menu font color red
-menu text lblCharNameValue 95 40 #charName
-menu text lblDeathsValue 365 40 %deaths
-menu text lblCurrentMineValue 52 60 %currentMine , / , %mines
-menu text lblTotalMinesValue 410 60 %invisibilityPotionsUsed
+menu text lblCharNameValue 95 70 #charName
+menu text lblDeathsValue 365 70 %deaths
+menu text lblCurrentMineValue 52 90 %currentMine , / , %mines
+menu text lblTotalMinesValue 410 90 %invisibilityPotionsUsed
 set %_mineProgress %spotsMined * 100 / %spots
-menu text lblCurrentMineProgressValue 190 80 %spotsMined , / , %spots , #spc , ( , %_mineProgress , % , )
-menu text lblPickaxesValue 380 80 %miningToolsUsed
-menu text lblRecallScrollsValue 120 100 %recallScrollsUsed
+menu text lblCurrentMineProgressValue 190 110 %spotsMined , / , %spots , #spc , ( , %_mineProgress , % , )
+menu text lblPickaxesValue 380 110 %miningToolsUsed
+menu text lblRecallScrollsValue 120 130 %recallScrollsUsed
 gosub calculateNetProfit
-menu text lblEstimatedNetProfitValue 415 100 #result
+menu text lblEstimatedNetProfitValue 415 130 #result
 gosub getElapsedTime
-menu text lblRunTimeValue 90 120 #result
+menu text lblRunTimeValue 90 150 #result
 
-menu text lblIronValue 50 160 %ironCollected
-menu text lblStoneValue 185 160 %stoneCollected
-menu text lblCopperValue 315 160 %copperCollected
-menu text lblAgapiteValue 435 160 %agapiteCollected
-menu text lblSilverValue 62 180 %silverCollected
-menu text lblShadowValue 200 180 %shadowCollected
-menu text lblGoldValue 295 180 %goldCollected
-menu text lblRoseValue 420 180 %roseCollected
-menu text lblValoriteValue 75 200 %valoriteCollected
-menu text lblVeriteValue 180 200 %veriteCollected
-menu text lblMytherilValue 320 200 %mytherilCollected
-menu text lblBloodrockValue 460 200 %bloodrockCollected
-menu text lblBlackrockValue 95 220 %blackrockCollected
-menu text lblPlatinumValue 205 220 %platinumCollected
-menu text lblCarbonPolymerValue 315 220 N/A
-menu text lblKevlarValue 428 220 N/A
-menu text lblDeltaValue 60 240 N/A
-menu text lblLiquidValue 185 240 N/A
-menu text lblRagnarokValue 332 240 N/A
+menu text lblIronValue 50 190 %ironCollected
+menu text lblStoneValue 185 190 %stoneCollected
+menu text lblCopperValue 315 190 %copperCollected
+menu text lblAgapiteValue 435 190 %agapiteCollected
+menu text lblSilverValue 62 210 %silverCollected
+menu text lblShadowValue 200 210 %shadowCollected
+menu text lblGoldValue 295 210 %goldCollected
+menu text lblRoseValue 420 210 %roseCollected
+menu text lblValoriteValue 75 230 %valoriteCollected
+menu text lblVeriteValue 180 230 %veriteCollected
+menu text lblMytherilValue 320 230 %mytherilCollected
+menu text lblBloodrockValue 460 230 %bloodrockCollected
+menu text lblBlackrockValue 95 250 %blackrockCollected
+menu text lblPlatinumValue 205 250 %platinumCollected
+menu text lblCarbonPolymerValue 315 250 N/A
+menu text lblKevlarValue 428 250 N/A
+menu text lblDeltaValue 60 270 N/A
+menu text lblLiquidValue 185 270 N/A
+menu text lblRagnarokValue 332 270 N/A
 set %_totalIngotsOres %ironCollected + %stoneCollected + %copperCollected + %agapiteCollected + %silverCollected + %shadowCollected + %goldCollected + %roseCollected + %valoriteCollected + %veriteCollected + %mytherilCollected + %bloodrockCollected + %blackrockCollected + %platinumCollected
-menu text lblTotalValue 430 240 %_totalIngotsOres
+menu text lblTotalValue 430 270 %_totalIngotsOres
+
+menu font size 10
+menu text lblLastDeathPlayersNearValue 500 90 *miningLastDeathPlayerAround
+menu font size 7
+menu text lblLastDeathJournal0Value 500 130 *miningLastDeathJournal0
+menu text lblLastDeathJournal1Value 500 140 *miningLastDeathJournal1
+menu text lblLastDeathJournal2Value 500 150 *miningLastDeathJournal2
+menu text lblLastDeathJournal3Value 500 160 *miningLastDeathJournal3
+menu text lblLastDeathJournal4Value 500 170 *miningLastDeathJournal4
+menu text lblLastDeathJournal5Value 500 180 *miningLastDeathJournal5
+menu text lblLastDeathJournal6Value 500 190 *miningLastDeathJournal6
+menu text lblLastDeathJournal7Value 500 200 *miningLastDeathJournal7
+menu text lblLastDeathJournal8Value 500 210 *miningLastDeathJournal8
+menu text lblLastDeathJournal9Value 500 220 *miningLastDeathJournal9
+menu text lblLastDeathJournal10Value 500 230 *miningLastDeathJournal10
+menu text lblLastDeathJournal11Value 500 240 *miningLastDeathJournal11
+menu text lblLastDeathJournal12Value 500 250 *miningLastDeathJournal12
+menu text lblLastDeathJournal13Value 500 260 *miningLastDeathJournal13
+menu text lblLastDeathJournal14Value 500 270 *miningLastDeathJournal14
+menu text lblLastDeathJournal15Value 500 280 *miningLastDeathJournal15
+
 menu show
 linesPerCycle 10
 return
