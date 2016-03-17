@@ -1,7 +1,7 @@
 set %containerId NHOAKMD
-set %wrestling #true
-set %weaponType TSF ; TSF = dagger
-set %kickOutHits 40
+set %wrestling #false
+set %weaponType CNF ; TSF = dagger (fencing) CNF = skinning knife (swordsmanship)
+set %kickOutHits 50
 
 set %alligator UF
 set %grizzlyBear WF
@@ -15,8 +15,8 @@ set %mandrakeRoot MZF
 set %bandages ZLF
 set %shields GIK_NIK_CIK
 
-msg $,waitmenu 'What do you want to summon ?' 'Grizzly Bear'$
-msg $,automenu 'What do you want to summon ?' 'Grizzly Bear'$
+msg $,waitmenu 'What do you want to summon ?' 'Crocodile'$
+msg $,automenu 'What do you want to summon ?' 'Crocodile'$
 
 gosub openContainer %containerId
 findItem %bandages C_ , #backPackId

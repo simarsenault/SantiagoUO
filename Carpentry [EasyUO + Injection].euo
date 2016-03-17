@@ -11,7 +11,7 @@ if ( #findStack < 100 )
     gosub dropBlankScrolls
     gosub grabLogs
 }
-findItem EGG C_ , #backPackId
+findItem EGG_IGG C_ , #backPackId
 if ( #findKind = -1 )
     pause
 set #lObjectId #findId
