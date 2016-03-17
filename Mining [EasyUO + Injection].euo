@@ -689,6 +689,7 @@ if ( #findCol <> %invisibilityPotionColor )
     ignoreItem #findId
     goto _rechargeInvisibilityPotions
 }
+set %invisibilityPotionsUsed %invisibilityPotionsUsed + 1
 exevent drag #findId 1
 exevent dropC #backPackId
 wait 10
@@ -893,6 +894,7 @@ set %_netProfit %ironCollected * %ironValue
 set %_netProfit %_netProfit + ( %stoneCollected * %stoneValue )
 set %_netProfit %_netProfit - ( %miningToolsUsed * %toolCost )
 set %_netProfit %_netProfit - ( %recallScrollsUsed * %recallScrollCost )
+set %_netProfit %_netProfit - ( %invisibilityPotionsUsed * %invisibilityPotionCost )
 return %_netProfit
 
 sub updateStatisticsMenu
@@ -912,8 +914,8 @@ menu font style b
 menu font size 12
 menu text lblCharName 10 40 Character:
 menu text lblDeaths 300 40 Deaths:
-menu text lblCurrentMine 10 60 Current mine:
-menu text lblTotalMines 300 60 Total mines:
+menu text lblCurrentMine 10 60 Mine:
+menu text lblTotalMines 300 60 Invis. potions:
 menu text lblCurrentMineProgress 10 80 Current mine progress:
 menu text lblPickaxes 300 80 Pickaxes:
 menu text lblRecallScrolls 10 100 Recall scrolls:
@@ -945,8 +947,8 @@ menu font style
 menu font color red
 menu text lblCharNameValue 95 40 #charName
 menu text lblDeathsValue 365 40 %deaths
-menu text lblCurrentMineValue 120 60 %currentMine
-menu text lblTotalMinesValue 395 60 %mines
+menu text lblCurrentMineValue 52 60 %currentMine , / , %mines
+menu text lblTotalMinesValue 410 60 %invisibilityPotionsUsed
 set %_mineProgress %spotsMined * 100 / %spots
 menu text lblCurrentMineProgressValue 190 80 %spotsMined , / , %spots , #spc , ( , %_mineProgress , % , )
 menu text lblPickaxesValue 380 80 %miningToolsUsed
