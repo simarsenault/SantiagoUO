@@ -41,9 +41,13 @@ set %ironIngots RMK
 set %ingots %ironIngots , _NMK_XMK_TMK
 set %oresIngots %ores , _ , %ingots
 set %recallScrolls WTL
+set %potion WUF
+set %invisibilityPotionColor 1585
 set %pathFindMineSpotTolerance 0
 set %pathFindForgeTolerance 1
 set %treasureBalls DMF
+set %humans IS_HS
+set %minerKillersId XVZM_GIXL         ; Jason Voorhees, Rukk
 
 ; Stats
 set %ironCollected 0
@@ -62,6 +66,7 @@ set %blackrockCollected 0
 set %platinumCollected 0
 set %miningToolsUsed 0
 set %recallScrollsUsed 0
+set %invisibilityPotionsUsed 0
 set %deaths 0
 
 ; Costs
@@ -69,9 +74,11 @@ set %ironValue 15
 set %stoneValue 10
 set %toolCost %ironValue * %ironRequiredMiningTool
 set %recallScrollCost 50
+set %invisibilityPotionCost 100
 
 ; Do not change
 set %mustBank #false
+set %mustUseInvisibilityPotion #false
 set %mineChanged #true
 set %currentMine 1
 set %start #scnt
@@ -80,6 +87,7 @@ tile init
 
 miningLoop:
 set %mustBank #false
+set %mustUseInvisibilityPotion #false
 if ( %mineChanged = #false )
     goto _miningLoop
 gosub resetForge
@@ -397,6 +405,14 @@ set %_mineZ %3
 set %_mineTile %4
 set %_nodeTries 0
 _mine:
+findItem %minerKillersId
+if ( #findKind <> -1 )
+{
+    set %mustBank #true
+    set %mustUseInvisibilityPotion #true
+    
+    return
+}
 set %_nodeTries %_nodeTries + 1
 if ( %_nodeTries > %nodeMaximumTries )
     return
@@ -553,13 +569,34 @@ goto _waitRecall
 
 sub bank
 gosub recall 1
+if ( %mustUseInvisibilityPotion = #true )
+    gosub useInvisibilityPotion
 gosub dropIngotsOres
 gosub dropTreasureBalls
+gosub dropEmptyBottles
+gosub findContainerStack #backPackId %potion %invisibilityPotionColor
+if ( #result = 0 )
+    gosub rechargeInvisibilityPotions
 gosub restockMiningTools
 if ( %rechargeRunebook = #true )
     gosub rechargeRunebook
 set %mineTemp %currentMine + 1
 gosub recall %mineTemp
+return
+
+sub useInvisibilityPotion
+ignoreItem reset
+_findInvisibilityPotion:
+findItem %potion C_ , #backPackId
+if ( #findKind = -1 )
+    return
+if ( #findCol <> %invisibilityPotionColor )
+{
+    ignoreItem #findId
+    goto _findInvisibilityPotion
+}
+set #lObjectId #findId
+event macro 17
 return
 
 sub dropIngotsOres
@@ -612,6 +649,38 @@ exevent drag #findId 1
 exevent dropC %dropContainerId
 wait 10
 goto _dropTreasureBalls
+
+sub dropEmptyBottles
+ignoreItem reset
+_dropEmptyBottles:
+findItem %potion C_ , #backPackId
+if ( #findKind = -1 )
+    return
+if ( #findCol <> 0 )
+{
+    ignoreItem #findId
+    goto _dropEmptyBottles
+}
+exevent drag #findId #findStack
+exevent dropC %dropContainerId
+wait 10
+goto _dropEmptyBottles
+
+sub rechargeInvisibilityPotions
+ignoreItem reset
+_rechargeInvisibilityPotions:
+findItem %potion C_ , %dropContainerId
+if ( #findKind = -1 )
+    return
+if ( #findCol <> %invisibilityPotionColor )
+{
+    ignoreItem #findId
+    goto _rechargeInvisibilityPotions
+}
+exevent drag #findId 1
+exevent dropC #backPackId
+wait 10
+return
 
 sub restockMiningTools
 ignoreItem reset
