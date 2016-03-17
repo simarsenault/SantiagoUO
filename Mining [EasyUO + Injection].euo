@@ -78,7 +78,7 @@ set %invisibilityPotionCost 100
 
 ; Do not change
 set %mustBank #false
-set %mustUseInvisibilityPotion #false
+set %emergencyBanking #false
 set %mineChanged #true
 set %currentMine 1
 set %start #scnt
@@ -87,7 +87,7 @@ tile init
 
 miningLoop:
 set %mustBank #false
-set %mustUseInvisibilityPotion #false
+set %emergencyBanking #false
 if ( %mineChanged = #false )
     goto _miningLoop
 gosub resetForge
@@ -409,7 +409,7 @@ findItem %minerKillersId
 if ( #findKind <> -1 )
 {
     set %mustBank #true
-    set %mustUseInvisibilityPotion #true
+    set %emergencyBanking #true
     
     return
 }
@@ -568,9 +568,9 @@ if ( #charPosX <> %_recallCharPosX || #charPosY <> %_recallCharPosY )
 goto _waitRecall
 
 sub bank
-gosub recall 1
-if ( %mustUseInvisibilityPotion = #true )
+if ( %emergencyBanking = #true )
     gosub useInvisibilityPotion
+gosub recall 1
 gosub dropIngotsOres
 gosub dropTreasureBalls
 gosub dropEmptyBottles
