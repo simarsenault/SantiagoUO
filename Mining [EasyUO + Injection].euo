@@ -153,8 +153,11 @@ set %currentMine %currentMine + 1
 if ( %currentMine > %mines )
     set %currentMine 1
 skipMine:
-gosub smartPathFind %forgeX %forgeY %forgeZ %pathFindForgeTolerance
-gosub smelt
+if ( %emergencyBanking = #false )
+{
+    gosub smartPathFind %forgeX %forgeY %forgeZ %pathFindForgeTolerance
+    gosub smelt
+}
 if ( #charGhost = yes )
 {
     set %deaths %deaths + 1
@@ -450,6 +453,14 @@ target
 event macro 22
 set %_mine #scnt + %miningTimeout
 _mineJournal:
+findItem %minerKillersId
+if ( #findKind <> -1 )
+{
+    set %mustBank #true
+    set %emergencyBanking #true
+
+    return
+}
 if ( %_mine < #scnt )
     return
 if ( #jIndex <= %_journal )
@@ -575,7 +586,7 @@ gosub dropIngotsOres
 gosub dropTreasureBalls
 gosub dropEmptyBottles
 gosub findContainerStack #backPackId %potion %invisibilityPotionColor
-if ( #result = 0 )
+if ( #result <= 0 )
     gosub rechargeInvisibilityPotions
 gosub restockMiningTools
 if ( %rechargeRunebook = #true )
@@ -668,6 +679,7 @@ goto _dropEmptyBottles
 
 sub rechargeInvisibilityPotions
 ignoreItem reset
+gosub openContainer %dropContainerId
 _rechargeInvisibilityPotions:
 findItem %potion C_ , %dropContainerId
 if ( #findKind = -1 )
