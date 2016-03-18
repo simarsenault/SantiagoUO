@@ -696,9 +696,9 @@ if ( #findCol <> %invisibilityPotionColor )
 }
 set %invisibilityPotionsUsed %invisibilityPotionsUsed + 1
 if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId #findStack #backPackId
+    gosub injectionDragDropContainer #findId 1 #backPackId
 else
-    gosub easyuoDragDropContainer #findId #findStack #backPackId
+    gosub easyuoDragDropContainer #findId 1 #backPackId
 return
 
 sub restockMiningTools
