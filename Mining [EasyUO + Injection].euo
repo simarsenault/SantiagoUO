@@ -810,6 +810,8 @@ if ( #contId = %_containerId )
 goto _openContainer
 
 sub updateLastDeathValues
+gosub formatDateTime #date #time
+set *miningLastDeathDateTime #result
 ignoreItem reset
 ignoreItem #charId
 set *miningLastDeathPlayerAround ---
@@ -833,6 +835,19 @@ for %_miningLastDeathJournalIndex #jIndex %_miningLastDeathJournalIndexEnd
     set %_miningLastDeathJournalCounter %_miningLastDeathJournalCounter - 1
 }
 return
+
+; gosub formatDateTime date time
+sub formatDateTime
+set %_formatDateTimeDate %1
+set %_formatDateTimeTime %2
+set %_formatDateTime %_formatDateTimeDate , %_formatDateTimeTime
+str Ins %_formatDateTime 20 0
+str Ins #strRes - 5
+str Ins #strRes - 8
+str Ins #strRes #spc 11
+str Ins #strRes : 14
+str Ins #strRes : 17
+return #strRes
 
 sub resurrect
 set %_resurrectX #charPosX
@@ -939,6 +954,9 @@ menu font size 14
 menu font color purple
 menu text lblStatistics 10 40 Statistics
 menu text lblLastDeathInformations 500 40 Last's Death
+
+menu font size 10
+menu text lblLastDeathDateTimeValue 620 43 ( , *miningLastDeathDateTime , )
 
 menu font color white
 menu font style b
