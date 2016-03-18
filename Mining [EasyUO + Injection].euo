@@ -28,6 +28,7 @@ set %miningTimeout 8             ; Maximum time allowed per mining stroke (secon
 set %nodeMaximumTries 3          ; Maximum failed attempts per mining node before going to the next
 set %deathTimer 5                ; Time to wait before resurrecting (minutes)
 set %searchForgeDistance 8       ; Maximum distance forge will be from recall location
+set %useInjectionDragDrop #true  ; Use Injection's ,moveitem instead of EasyUO's exevent drag/drop
 
 ; Constants
 set %tinkeringTools GTL
@@ -646,9 +647,10 @@ if ( #findType = RMK && #findCol = 1908 )
 if ( #findType = RMK && #findCol = 1153 )
     set %platinumCollected %platinumCollected + #findStack
 ignoreitem #findid
-exevent drag #findId #findStack
-exevent dropc %dropContainerId
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId #findStack %dropContainerId
+else
+    gosub easyuoDragDropContainer #findId #findStack %dropContainerId
 goto _dropIngotsOres
 
 sub dropTreasureBalls
@@ -657,9 +659,10 @@ _dropTreasureBalls:
 findItem %treasureBalls C_ , #backPackId
 if ( #findKind = -1 )
     return
-exevent drag #findId 1
-exevent dropC %dropContainerId
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId 1 %dropContainerId
+else
+    gosub easyuoDragDropContainer #findId 1 %dropContainerId
 goto _dropTreasureBalls
 
 sub dropEmptyBottles
@@ -673,9 +676,10 @@ if ( #findCol <> 0 )
     ignoreItem #findId
     goto _dropEmptyBottles
 }
-exevent drag #findId #findStack
-exevent dropC %dropContainerId
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId #findStack %dropContainerId
+else
+    gosub easyuoDragDropContainer #findId #findStack %dropContainerId
 goto _dropEmptyBottles
 
 sub rechargeInvisibilityPotions
@@ -691,9 +695,10 @@ if ( #findCol <> %invisibilityPotionColor )
     goto _rechargeInvisibilityPotions
 }
 set %invisibilityPotionsUsed %invisibilityPotionsUsed + 1
-exevent drag #findId 1
-exevent dropC #backPackId
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId #findStack #backPackId
+else
+    gosub easyuoDragDropContainer #findId #findStack #backPackId
 return
 
 sub restockMiningTools
@@ -714,9 +719,10 @@ if ( #findCnt < %miningToolsToGrab )
 for %_loop 1 %miningToolsToGrab
 {
     findItem %miningTools C_ , %dropContainerId
-    exevent drag #findId
-    exevent dropC #backPackId
-    wait 10
+    if ( %useInjectionDragDrop = #true )
+        gosub injectionDragDropContainer #findId 1 #backPackId
+    else
+        gosub easyuoDragDropContainer #findId 1 #backPackId
 }
 set %miningToolsUsed %miningToolsUsed + %miningToolsToGrab
 return
@@ -726,9 +732,10 @@ ignoreItem reset
 findItem %tinkeringTools C_ , %dropContainerId
 if ( #findKind = -1 )
     pause
-exevent drag #findId 1
-exevent dropC #backPackId
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId 1 #backPackId
+else
+    gosub easyuoDragDropContainer #findId 1 #backPackId
 _findIronIngots:
 findItem %ironIngots C_ , %dropContainerId
 if ( #findKind = -1 )
@@ -739,9 +746,10 @@ if ( #findCol <> 0 )
     goto _findIronIngots
 }
 set %_ironAmount %ironRequiredMiningTool * %miningToolsToCraft
-exevent drag #findId %_ironAmount
-exevent dropC #backPackId
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId %_ironAmount #backPackId
+else
+    gosub easyuoDragDropContainer #findId %_ironAmount #backPackId
 ignoreItem reset
 _craftMiningTool:
 findItem %ironIngots C_ , #backPackId
@@ -761,16 +769,18 @@ goto _craftMiningTool
 _dropTinkeringTools:
 ignoreItem reset
 findItem %tinkeringTools C_ , #backPackId
-exevent drag #findId 1
-exevent dropC %dropContainerId
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId 1 %dropContainerId
+else
+    gosub easyuoDragDropContainer #findId 1 %dropContainerId
 _dropMiningTools:
 findItem %miningTools C_ , #backPackId
 if ( #findKind = -1 )
     return
-exevent drag #findId 1
-exevent dropC %dropContainerId 50 50
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId 1 %dropContainerId
+else
+    gosub easyuoDragDropContainer #findId 1 %dropContainerId
 goto _dropMiningTools
 
 sub rechargeRunebook
@@ -785,14 +795,16 @@ if ( #findCol <> 0 )
     ignoreItem #findId
     goto rechargeRunebook
 }
-exevent drag #findId %maxRunebookCharges
-exevent dropC %runebookId
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId %maxRunebookCharges %runebookId
+else
+    gosub easyuoDragDropContainer #findId %maxRunebookCharges %runebookId
 findItem %recallScrolls C_ , #backPackId
 set %recallScrollsUsed %recallScrollsUsed + ( %maxRunebookCharges - #findStack )
-exevent drag #findId #findStack
-exevent dropC %dropContainerId
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId #findStack %dropContainerId
+else
+    gosub easyuoDragDropContainer #findId #findStack %dropContainerId
 return
 
 ; gosub openContainer [containerId]
@@ -906,6 +918,27 @@ if ( %_waitGumpTimeout < #scnt )
 if ( #contSizeX = %_waitGumpWidth && #contSizeY = %_waitGumpHeight )
     return #true
 goto _waitGump
+
+; gosub injectionDragDropContainer itemId amount containerId
+sub injectionDragDropContainer
+set %_injectionDragDropContainerItemId %1
+set %_injectionDragDropContainerAmount %2
+set %_injectionDragDropContainerContainerId %3
+set #lObjectId %_injectionDragDropContainerItemId
+set #lTargetId %_injectionDragDropContainerContainerId
+msg $,moveitem lastobject %_injectionDragDropContainerAmount lasttarget$
+wait 10
+return
+
+; gosub easyuoDragDropContainer itemId amount containerId
+sub easyuoDragDropContainer
+set %_easyuoDragDropContainerItemId %1
+set %_easyuoDragDropContainerAmount %2
+set %_easyuoDragDropContainerContainerId %3
+exevent drag %_easyuoDragDropContainerItemId %_easyuoDragDropContainerAmount
+exevent dropC %_easyuoDragDropContainerContainerId
+wait 10
+return
 
 sub getElapsedTime
 set %_days 0
