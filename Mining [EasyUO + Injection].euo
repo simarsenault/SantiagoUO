@@ -517,9 +517,10 @@ finditem %oresStacks C_ , #backpackId
 if ( #findKind = -1 )
     return
 ignoreitem #findId
-exevent drag #findId 1
-exevent dropc #backpackid 80 80
-wait 10
+if ( %useInjectionDragDrop = #true )
+    gosub injectionDragDropContainer #findId 1 #backPackId 80 80
+else
+    gosub easyuoDragDropContainer #findId 1 #backPackId 80 80
 goto _seperateOres
 
 sub isBankingRequired
@@ -778,9 +779,9 @@ findItem %miningTools C_ , #backPackId
 if ( #findKind = -1 )
     return
 if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId 1 %dropContainerId
+    gosub injectionDragDropContainer #findId 1 %dropContainerId 50 50
 else
-    gosub easyuoDragDropContainer #findId 1 %dropContainerId
+    gosub easyuoDragDropContainer #findId 1 %dropContainerId 50 50
 goto _dropMiningTools
 
 sub rechargeRunebook
@@ -919,24 +920,32 @@ if ( #contSizeX = %_waitGumpWidth && #contSizeY = %_waitGumpHeight )
     return #true
 goto _waitGump
 
-; gosub injectionDragDropContainer itemId amount containerId
+; gosub injectionDragDropContainer itemId amount containerId [x] [y]
 sub injectionDragDropContainer
 set %_injectionDragDropContainerItemId %1
 set %_injectionDragDropContainerAmount %2
 set %_injectionDragDropContainerContainerId %3
-set #lObjectId
-set #lTargetId
-msg $,moveitem %_injectionDragDropContainerItemId %_injectionDragDropContainerAmount %_injectionDragDropContainerContainerId $
+set %_injectionDragDropContainerX %4
+set %_injectionDragDropContainerY %5
+if ( %_injectionDragDropContainerX <> N/A && %_injectionDragDropContainerY <> N/A )
+    msg $,moveitem %_injectionDragDropContainerItemId %_injectionDragDropContainerAmount %_injectionDragDropContainerContainerId %_injectionDragDropContainerX %_injectionDragDropContainerY $
+else
+    msg $,moveitem %_injectionDragDropContainerItemId %_injectionDragDropContainerAmount %_injectionDragDropContainerContainerId $
 wait 10
 return
 
-; gosub easyuoDragDropContainer itemId amount containerId
+; gosub easyuoDragDropContainer itemId amount containerId [x] [y]
 sub easyuoDragDropContainer
 set %_easyuoDragDropContainerItemId %1
 set %_easyuoDragDropContainerAmount %2
 set %_easyuoDragDropContainerContainerId %3
+set %_easyuoDragDropContainerX %4
+set %_easyuoDragDropContainerY %5
 exevent drag %_easyuoDragDropContainerItemId %_easyuoDragDropContainerAmount
-exevent dropC %_easyuoDragDropContainerContainerId
+if ( %_easyuoDragDropContainerX <> N/A && %_easyuoDragDropContainerY <> N/A )
+    exevent dropC %_easyuoDragDropContainerContainerId %_easyuoDragDropContainerX %_easyuoDragDropContainerY
+else
+    exevent dropC %_easyuoDragDropContainerContainerId
 wait 10
 return
 
