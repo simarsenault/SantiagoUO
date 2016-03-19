@@ -931,7 +931,7 @@ if ( %0 = 5 )
     msg $,moveitem %_injectionDragDropContainerItemId %_injectionDragDropContainerAmount %_injectionDragDropContainerContainerId %_injectionDragDropContainerX %_injectionDragDropContainerY $
 else
     msg $,moveitem %_injectionDragDropContainerItemId %_injectionDragDropContainerAmount %_injectionDragDropContainerContainerId $
-wait 10
+wait 20
 return
 
 ; gosub easyuoDragDropContainer itemId amount containerId [x] [y]
