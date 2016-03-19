@@ -927,7 +927,7 @@ set %_injectionDragDropContainerAmount %2
 set %_injectionDragDropContainerContainerId %3
 set %_injectionDragDropContainerX %4
 set %_injectionDragDropContainerY %5
-if ( %_injectionDragDropContainerX <> N/A && %_injectionDragDropContainerY <> N/A )
+if ( %0 = 5 )
     msg $,moveitem %_injectionDragDropContainerItemId %_injectionDragDropContainerAmount %_injectionDragDropContainerContainerId %_injectionDragDropContainerX %_injectionDragDropContainerY $
 else
     msg $,moveitem %_injectionDragDropContainerItemId %_injectionDragDropContainerAmount %_injectionDragDropContainerContainerId $
@@ -942,7 +942,7 @@ set %_easyuoDragDropContainerContainerId %3
 set %_easyuoDragDropContainerX %4
 set %_easyuoDragDropContainerY %5
 exevent drag %_easyuoDragDropContainerItemId %_easyuoDragDropContainerAmount
-if ( %_easyuoDragDropContainerX <> N/A && %_easyuoDragDropContainerY <> N/A )
+if ( %0 = 5 )
     exevent dropC %_easyuoDragDropContainerContainerId %_easyuoDragDropContainerX %_easyuoDragDropContainerY
 else
     exevent dropC %_easyuoDragDropContainerContainerId
