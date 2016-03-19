@@ -48,7 +48,7 @@ set %pathFindMineSpotTolerance 0
 set %pathFindForgeTolerance 1
 set %treasureBalls DMF
 set %humans IS_HS
-set %minerKillersId XVZM_COOO_XZTF         ; Jason Voorhees, Firulais, Unknown
+set %minerKillersId XVZM_COOO_XZTF_VHFR         ; Jason Voorhees, Firulais, Unknown; Game Over
 
 ; Stats
 set %ironCollected 0
