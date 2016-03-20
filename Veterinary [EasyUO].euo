@@ -1,19 +1,23 @@
 ; Make sure you have bandages in your backpack
 ; Need water trough on ground within 1 tile to clean bandages
 
-set %petOne NTBI
-set %petTwo ZEII
+set %petOne NTBI          ; Has to be named "One"
+set %petTwo ZEII          ; Has to be named "Two"
+set %petThree YWHI        ; Has to be named "Three"
 
 set %waterTrough VEE_QEE
 set %bloodyBandages AMF
 set %bandages ZLF
 
+gosub attack One %petTwo
+gosub attack Two %petThree
+gosub attack Three %petOne
+
 loop:
 gosub cleanBandages
-gosub attack %petOne
-gosub attack %petTwo
 gosub heal %petOne
 gosub heal %petTwo
+gosub heal %petThree
 goto loop
 
 sub cleanBandages
@@ -32,22 +36,38 @@ event macro 22
 return
 
 sub attack
-set %_attackId %1
+set %_attackName %1
+set %_attackId %2
 set #lTargetId %_attackId
 set #lTargetKind 1
-msg $all kill$
+msg $ , %_attackName kill$
 target 6s
 event macro 22
 return
 
 sub heal
 set %_healId %1
+_heal:
 findItem ZLF C_ , #backPackId
 set #lObjectId #findId
 set #lTargetId %_healId
 set #lTargetKind 1
 event macro 17
 target 6s
+set %_healJournal #jIndex + 1
+set %_healTimeout #scnt + 3
 event macro 22
-wait 50
-return
+_healJournal:
+if ( %_healTimeout < #scnt )
+    return
+if ( %_healJournal > #jIndex  )
+    goto _healJournal
+scanJournal %_healJournal
+if ( it_is_not_wounded in #journal )
+    return
+if ( you_finish_applying_bandages in #journal )
+    return
+if ( you_fail_to_apply in #journal )
+    goto _heal
+set %_healJournal %_healJournal + 1
+goto _healJournal
