@@ -1,0 +1,53 @@
+; Make sure you have bandages in your backpack
+; Need water trough on ground within 1 tile to clean bandages
+
+set %petOne NTBI
+set %petTwo ZEII
+
+set %waterTrough VEE_QEE
+set %bloodyBandages AMF
+set %bandages ZLF
+
+loop:
+gosub cleanBandages
+gosub attack %petOne
+gosub attack %petTwo
+gosub heal %petOne
+gosub heal %petTwo
+goto loop
+
+sub cleanBandages
+findItem %bloodyBandages C_ , #backPackId
+if ( #findKind = -1 )
+    return
+set #lObjectId #findId
+findItem %waterTrough G_2
+if ( #findKind = -1 )
+    return
+set #lTargetId #findId
+set #lTargetKind 1
+event macro 17
+target 6s
+event macro 22
+return
+
+sub attack
+set %_attackId %1
+set #lTargetId %_attackId
+set #lTargetKind 1
+msg $all kill$
+target 6s
+event macro 22
+return
+
+sub heal
+set %_healId %1
+findItem ZLF C_ , #backPackId
+set #lObjectId #findId
+set #lTargetId %_healId
+set #lTargetKind 1
+event macro 17
+target 6s
+event macro 22
+wait 50
+return
