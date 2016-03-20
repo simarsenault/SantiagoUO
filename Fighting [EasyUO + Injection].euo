@@ -1,6 +1,6 @@
 set %containerId NHOAKMD
 set %wrestling #false
-set %weaponType CNF ; TSF = dagger (fencing) CNF = skinning knife (swordsmanship)
+set %weaponType VOH ; TSF = dagger (fencing) CNF = skinning knife (swordsmanship) VOH = club (macefighting)
 set %kickOutHits 50
 
 set %alligator UF
