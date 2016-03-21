@@ -1,6 +1,6 @@
-set %housePartsContainerId TBOAKMD
-set %resourcesContainerId XWNAKMD
-set %housePartsNeeded 225
+set %housePartsContainerId JAOAKMD
+set %resourcesContainerId TOEAKMD
+set %housePartsNeeded 8
 
 set %housePart UYF
 set %jointingPlane IGG
