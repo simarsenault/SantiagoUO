@@ -3,15 +3,20 @@ if ( #charName = Stella )
 {
     set %mines 10
     set %runebookId PIWYJMD
+    set %dropContainerId XWNAKMD
     set %emergencyBankingActivated #true
+    set %craftCopperPickaxes #true
+    set %craftAgapitePickaxes #true
 }
 if ( #charName = Bentley )
 {
     set %mines 9
     set %runebookId BOYBKMD
+    set %dropContainerId XWNAKMD
     set %emergencyBankingActivated #false
+    set %craftCopperPickaxes #false
+    set %craftAgapitePickaxes #false
 }
-set %dropContainerId XWNAKMD     ; Work container (drop ingots/ores, contains recall scroll, pickaxes and tinker tool)
 set %smeltWeight 350             ; Weight needed to go smelt
 set %bankWeight 175              ; Weight above this value after smelting will trigger a bank
 set %bankIronIngots 100          ; Iron ingots above this value after smelting will trigger a bank
@@ -33,6 +38,8 @@ set %useInjectionDragDrop #true  ; Use Injection's ,moveitem instead of EasyUO's
 ; Constants
 set %tinkeringTools GTL
 set %ironRequiredMiningTool 8
+set %copperRequiredMiningTool 30
+set %agapiteRequiredMiningTool 30
 set %miningTools NPF_QPF
 set %forge JBG
 set %oresStacks DWJ_EWJ_GWJ
@@ -65,7 +72,9 @@ set %mytherilCollected 0
 set %bloodrockCollected 0
 set %blackrockCollected 0
 set %platinumCollected 0
-set %miningToolsUsed 0
+set %ironMiningToolsUsed 0
+set %copperMiningToolsUsed 0
+set %agapiteMiningToolsUsed 0
 set %recallScrollsUsed 0
 set %invisibilityPotionsUsed 0
 set %deaths 0
@@ -73,7 +82,7 @@ set %deaths 0
 ; Costs
 set %ironValue 15
 set %stoneValue 10
-set %toolCost %ironValue * %ironRequiredMiningTool
+set %ironMiningToolCost %ironValue * %ironRequiredMiningTool
 set %recallScrollCost 50
 set %invisibilityPotionCost 100
 
@@ -517,10 +526,7 @@ finditem %oresStacks C_ , #backpackId
 if ( #findKind = -1 )
     return
 ignoreitem #findId
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId 1 #backPackId 80 80
-else
-    gosub easyuoDragDropContainer #findId 1 #backPackId 80 80
+gosub dragDropContainer #findId 1 #backPackId 80 80
 goto _seperateOres
 
 sub isBankingRequired
@@ -648,10 +654,7 @@ if ( #findType = RMK && #findCol = 1908 )
 if ( #findType = RMK && #findCol = 1153 )
     set %platinumCollected %platinumCollected + #findStack
 ignoreitem #findid
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId #findStack %dropContainerId
-else
-    gosub easyuoDragDropContainer #findId #findStack %dropContainerId
+gosub dragDropContainer #findId #findStack %dropContainerId
 goto _dropIngotsOres
 
 sub dropTreasureBalls
@@ -660,10 +663,7 @@ _dropTreasureBalls:
 findItem %treasureBalls C_ , #backPackId
 if ( #findKind = -1 )
     return
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId 1 %dropContainerId
-else
-    gosub easyuoDragDropContainer #findId 1 %dropContainerId
+gosub dragDropContainer #findId 1 %dropContainerId
 goto _dropTreasureBalls
 
 sub dropEmptyBottles
@@ -677,10 +677,7 @@ if ( #findCol <> 0 )
     ignoreItem #findId
     goto _dropEmptyBottles
 }
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId #findStack %dropContainerId
-else
-    gosub easyuoDragDropContainer #findId #findStack %dropContainerId
+gosub dragDropContainer #findId #findStack %dropContainerId
 goto _dropEmptyBottles
 
 sub rechargeInvisibilityPotions
@@ -696,10 +693,7 @@ if ( #findCol <> %invisibilityPotionColor )
     goto _rechargeInvisibilityPotions
 }
 set %invisibilityPotionsUsed %invisibilityPotionsUsed + 1
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId 1 #backPackId
-else
-    gosub easyuoDragDropContainer #findId 1 #backPackId
+gosub dragDropContainer #findId 1 #backPackId
 return
 
 sub restockMiningTools
@@ -720,48 +714,96 @@ if ( #findCnt < %miningToolsToGrab )
 for %_loop 1 %miningToolsToGrab
 {
     findItem %miningTools C_ , %dropContainerId
-    if ( %useInjectionDragDrop = #true )
-        gosub injectionDragDropContainer #findId 1 #backPackId
-    else
-        gosub easyuoDragDropContainer #findId 1 #backPackId
+    if ( #findCol = 0 )
+        set %ironMiningToolsUsed %ironMiningToolsUsed + 1
+    if ( #findCol = 1601 )
+        set %copperMiningToolsUsed %copperMiningToolsUsed + 1
+    if ( #findCol = 1024 )
+        set %agapiteMiningToolsUsed %agapiteMiningToolsUsed + 1
+    gosub dragDropContainer #findId 1 #backPackId
 }
-set %miningToolsUsed %miningToolsUsed + %miningToolsToGrab
 return
 
+sub findItemContainer
+set %_findItemContainerContainerId %1
+set %_findItemContainerItemId %2
+set %_findItemContainerColor %3
+ignoreItem reset
+_findItemContainer:
+findItem %_findItemContainerItemId C_ , %_findItemContainerContainerId
+if ( #findKind = -1 )
+    return #false
+if ( #findCol <> %_findItemContainerColor )
+{
+    ignoreItem #findId
+    goto _findItemContainer
+}
+return #true
+
 sub craftMiningTools
+msg $,cancelmenu$
 ignoreItem reset
 findItem %tinkeringTools C_ , %dropContainerId
 if ( #findKind = -1 )
     pause
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId 1 #backPackId
-else
-    gosub easyuoDragDropContainer #findId 1 #backPackId
-_findIronIngots:
-findItem %ironIngots C_ , %dropContainerId
-if ( #findKind = -1 )
+gosub dragDropContainer #findId 1 #backPackId
+if ( %craftAgapitePickaxes = #true )
+{
+    gosub findItemContainer %dropContainerId RMK 1024
+    if ( #result = #true && #findStack >= %agapiteRequiredMiningTool )
+    {
+        set %_ingotType RMK
+        set %_ingotColor 1024
+        set %_ingotPerMiningTool %agapiteRequiredMiningTool
+        set %_agapiteAmount %agapiteRequiredMiningTool * %miningToolsToCraft
+        if ( %_agapiteAmount > #findStack )
+            set %_agapiteAmount #findStack
+        gosub dragDropContainer #findId %_agapiteAmount #backPackId
+        msg $,automenu 'Colored Pickaxes' 'Agapite Pickaxe'$
+        goto _craftMiningTool
+    }
+}
+if ( %craftCopperPickaxes = #true )
+{
+    gosub findItemContainer %dropContainerId NMK 0
+    if ( #result = #true && #findStack >= %copperRequiredMiningTool )
+    {
+        set %_ingotType NMK
+        set %_ingotColor 0
+        set %_ingotPerMiningTool %copperRequiredMiningTool
+        set %_copperAmount %copperRequiredMiningTool * %miningToolsToCraft
+        if ( %_copperAmount > #findStack )
+            set %_copperAmount #findStack
+        gosub dragDropContainer #findId %_copperAmount #backPackId
+        msg $,automenu 'Colored Pickaxes' 'Copper Pickaxe'$
+        goto _craftMiningTool
+    }
+}
+gosub findItemContainer %dropContainerId RMK 0
+if ( #result = #false || #findStack < %ironRequiredMiningTool )
     pause
-if ( #findCol <> 0 )
-{
-    ignoreItem #findId
-    goto _findIronIngots
-}
+set %_ingotType RMK
+set %_ingotColor 0
+set %_ingotPerMiningTool %ironRequiredMiningTool
 set %_ironAmount %ironRequiredMiningTool * %miningToolsToCraft
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId %_ironAmount #backPackId
-else
-    gosub easyuoDragDropContainer #findId %_ironAmount #backPackId
-ignoreItem reset
+if ( %_ironAmount > #findStack )
+    set %_ironAmount #findStack
+gosub dragDropContainer #findId %_ironAmount #backPackId
+msg $,automenu 'Tinkering' 'Tools'$
+msg $,automenu 'Tools' 'pickaxe'$
 _craftMiningTool:
-findItem %ironIngots C_ , #backPackId
-if ( #findCol <> 0 )
+ignoreItem reset
+_searchIngots:
+findItem %_ingotType C_ , #backPackId
+if ( #findKind = -1 )
+    goto _dropTinkeringTools
+if ( #findCol <> %_ingotColor )
 {
     ignoreItem #findId
-    goto _craftMiningTool
+    goto _searchIngots
 }
-if ( #findKind = -1 || #findStack < %ironRequiredMiningTool )
+if ( #findStack < %_ingotPerMiningTool )
     goto _dropTinkeringTools
-msg $,waitmenu 'Tinkering' 'Tools' 'Tools' 'pickaxe'$
 findItem %tinkeringTools C_ , #backPackId
 set #lObjectId #findId
 event macro 17
@@ -770,18 +812,12 @@ goto _craftMiningTool
 _dropTinkeringTools:
 ignoreItem reset
 findItem %tinkeringTools C_ , #backPackId
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId 1 %dropContainerId
-else
-    gosub easyuoDragDropContainer #findId 1 %dropContainerId
+gosub dragDropContainer #findId 1 %dropContainerId
 _dropMiningTools:
 findItem %miningTools C_ , #backPackId
 if ( #findKind = -1 )
     return
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId 1 %dropContainerId 50 50
-else
-    gosub easyuoDragDropContainer #findId 1 %dropContainerId 50 50
+gosub dragDropContainer #findId 1 %dropContainerId 50 50
 goto _dropMiningTools
 
 sub rechargeRunebook
@@ -796,16 +832,10 @@ if ( #findCol <> 0 )
     ignoreItem #findId
     goto rechargeRunebook
 }
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId %maxRunebookCharges %runebookId
-else
-    gosub easyuoDragDropContainer #findId %maxRunebookCharges %runebookId
+gosub dragDropContainer #findId %maxRunebookCharges %runebookId
 findItem %recallScrolls C_ , #backPackId
 set %recallScrollsUsed %recallScrollsUsed + ( %maxRunebookCharges - #findStack )
-if ( %useInjectionDragDrop = #true )
-    gosub injectionDragDropContainer #findId #findStack %dropContainerId
-else
-    gosub easyuoDragDropContainer #findId #findStack %dropContainerId
+gosub dragDropContainer #findId #findStack %dropContainerId
 return
 
 ; gosub openContainer [containerId]
@@ -920,6 +950,23 @@ if ( #contSizeX = %_waitGumpWidth && #contSizeY = %_waitGumpHeight )
     return #true
 goto _waitGump
 
+sub dragDropContainer
+if ( %useInjectionDragDrop = #true )
+{
+    if ( %0 = 5 )
+        gosub injectionDragDropContainer %1 %2 %3 %4 %5
+    else
+        gosub injectionDragDropContainer %1 %2 %3
+}
+else
+{
+    if ( %0 = 5 )
+        gosub easyuoDragDropContainer %1 %2 %3 %4 %5
+    else
+        gosub easyuoDragDropContainer %1 %2 %3
+}
+return
+
 ; gosub injectionDragDropContainer itemId amount containerId [x] [y]
 sub injectionDragDropContainer
 set %_injectionDragDropContainerItemId %1
@@ -931,7 +978,7 @@ if ( %0 = 5 )
     msg $,moveitem %_injectionDragDropContainerItemId %_injectionDragDropContainerAmount %_injectionDragDropContainerContainerId %_injectionDragDropContainerX %_injectionDragDropContainerY 0$
 else
     msg $,moveitem %_injectionDragDropContainerItemId %_injectionDragDropContainerAmount %_injectionDragDropContainerContainerId $
-wait 20
+wait 30
 return
 
 ; gosub easyuoDragDropContainer itemId amount containerId [x] [y]
@@ -975,7 +1022,7 @@ return %_days , d , #spc ,  %_hours , h , #spc ,  %_minutes , m , #spc , %_secon
 sub calculateNetProfit
 set %_netProfit %ironCollected * %ironValue
 set %_netProfit %_netProfit + ( %stoneCollected * %stoneValue )
-set %_netProfit %_netProfit - ( %miningToolsUsed * %toolCost )
+set %_netProfit %_netProfit - ( %ironMiningToolsUsed * %ironMiningToolCost )
 set %_netProfit %_netProfit - ( %recallScrollsUsed * %recallScrollCost )
 set %_netProfit %_netProfit - ( %invisibilityPotionsUsed * %invisibilityPotionCost )
 return %_netProfit
@@ -1044,7 +1091,7 @@ menu text lblCurrentMineValue 52 90 %currentMine , / , %mines
 menu text lblTotalMinesValue 410 90 %invisibilityPotionsUsed
 set %_mineProgress %spotsMined * 100 / %spots
 menu text lblCurrentMineProgressValue 190 110 %spotsMined , / , %spots , #spc , ( , %_mineProgress , % , )
-menu text lblPickaxesValue 380 110 %miningToolsUsed
+menu text lblPickaxesValue 380 110 %ironMiningToolsUsed , / , %copperMiningToolsUsed , / , %agapiteMiningToolsUsed
 menu text lblRecallScrollsValue 120 130 %recallScrollsUsed
 gosub calculateNetProfit
 menu text lblEstimatedNetProfitValue 415 130 #result
