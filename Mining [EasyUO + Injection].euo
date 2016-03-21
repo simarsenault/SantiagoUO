@@ -55,7 +55,7 @@ set %pathFindMineSpotTolerance 0
 set %pathFindForgeTolerance 1
 set %treasureBalls DMF
 set %humans IS_HS
-set %minerKillersId XVZM_COOO_XZTF_VHFE_FJFC         ; Jason Voorhees, Firulais, Unknown; Game Over, Knorr
+set %minerKillersId XVZM_COOO_XZTF_VHFE_FJFC_PJHI         ; Jason Voorhees, Firulais, Unknown; Game Over, Knorr, Rajoy
 
 ; Stats
 set %ironCollected 0
@@ -176,6 +176,7 @@ if ( #charGhost = yes )
 {
     gosub updateLastDeathValues
     set %deaths %deaths + 1
+    gosub updateStatisticsMenu
     gosub resurrect
 }
 gosub bank
