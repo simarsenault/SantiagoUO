@@ -111,6 +111,9 @@ for %miningLoop 1 %spots
     set %mineX %spotX . %miningLoop
     set %mineY %spotY . %miningLoop
     set %mineZ %spotZ . %miningLoop
+    
+    if ( %mineX = %forgeX && %mineY = %forgeY )
+        continue
 
     gosub hasUnminedTileAround %mineX %mineY
     if ( #result = #true )
