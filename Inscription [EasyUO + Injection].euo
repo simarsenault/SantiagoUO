@@ -1,5 +1,5 @@
-set %containerId OHOAKMD
-set %craft Flamestrike           ; Recall | Flamestrike
+set %containerId TOEAKMD
+set %craft Recall           ; Recall | Flamestrike
 set %recharge #false
 
 if ( %craft = Recall )
