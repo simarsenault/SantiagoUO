@@ -2,14 +2,15 @@
 if ( #charName = Night )
 {
     set %runebookId TJQDKMD          ; Runebook ID
+    set %dropContainerId XWNAKMD
     set %lumberjackSpots 8           ; Number of spots in runebook
 }
 if ( #charName = Dragono )
 {
     set %runebookId TSNFKMD          ; Runebook ID
+    set %dropContainerId BCCWJMD
     set %lumberjackSpots 6           ; Number of spots in runebook
 }
-set %dropContainerId XWNAKMD     ; Work container (drop logs, contains recall scroll, hatchets and tinker tool)
 set %area 40                     ; Area to scan
 set %pathfindTimeout 10          ; Maximum time allowed per pathfind (seconds)
 set %maximumPathfindDistance 17  ; Maximum distance to pathFind
