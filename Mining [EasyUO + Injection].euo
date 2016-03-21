@@ -93,6 +93,7 @@ set %mineChanged #true
 set %currentMine 1
 set %start #scnt
 
+msg $,waitmenu 'Tinkering' 'Tools'$ ; To debug ,automenu
 tile init
 
 miningLoop:
