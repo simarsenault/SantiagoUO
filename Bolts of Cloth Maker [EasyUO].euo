@@ -39,10 +39,11 @@ sub recharge
 gosub openBank
 gosub findItemContainer #backPackId %boltsOfCloth -1
 if ( #result = #false )
-    pause
+    goto _grabGold
 exevent drag #findId #findStack
 exevent dropC #contId 50 50
 wait 10
+_grabGold:
 gosub findItemContainer #contId %gold %itemStoneWoolCost
 if ( #result = #false )
     pause

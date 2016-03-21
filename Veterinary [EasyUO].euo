@@ -9,6 +9,8 @@ set %waterTrough VEE_QEE
 set %bloodyBandages AMF
 set %bandages ZLF
 
+ignoreItem reset
+
 gosub attack One %petTwo
 gosub attack Two %petThree
 gosub attack Three %petOne
