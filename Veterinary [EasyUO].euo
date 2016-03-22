@@ -2,7 +2,7 @@
 ; Need water trough on ground within 1 tile to clean bandages
 
 set %petOne NTBI          ; Has to be named "One"
-set %petTwo ZEII          ; Has to be named "Two"
+set %petTwo YFII          ; Has to be named "Two"
 set %petThree YWHI        ; Has to be named "Three"
 
 set %waterTrough VEE_QEE
@@ -11,11 +11,16 @@ set %bandages ZLF
 
 ignoreItem reset
 
-gosub attack One %petTwo
-gosub attack Two %petThree
-gosub attack Three %petOne
+set %attackTimer #scnt
 
 loop:
+if ( %attackTimer <= #scnt )
+{
+    gosub attack One %petTwo
+    gosub attack Two %petThree
+    gosub attack Three %petOne
+    set %attackTimer #scnt + 3
+}
 gosub cleanBandages
 gosub heal %petOne
 gosub heal %petTwo
