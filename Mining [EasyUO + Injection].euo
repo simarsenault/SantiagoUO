@@ -26,7 +26,7 @@ set %miningToolsRecharge 4       ; Amount of mining tools to have before going b
 set %rechargeRunebook #true      ; Recharge runebook (#true/#false)
 set %maxRunebookCharges 10       ; Maximum charges in runebook
 set %miningToolsToCraft 10       ; When out of pickaxes, amount to craft
-set %maximumPathfindDistance 17  ; Maximum distance to pathFind
+set %maximumPathfindDistance 10  ; Maximum distance to pathFind
 set %smartPathFindTimeout 60     ; Maximum time allowed per smart pathfind (seconds)
 set %pathfindTimeout 10          ; Maximum time allowed per pathfind (seconds)
 set %miningTimeout 8             ; Maximum time allowed per mining stroke (seconds)
@@ -55,7 +55,7 @@ set %pathFindMineSpotTolerance 0
 set %pathFindForgeTolerance 1
 set %treasureBalls DMF
 set %humans IS_HS
-set %minerKillersId XVZM_COOO_XZTF_VHFE_FJFC_PJHI_AQBG         ; Jason Voorhees, Firulais, Unknown; Game Over, Knorr, Rajoy, Bathory
+set %minerKillerIds XVZM_COOO_XZTF_VHFE_FJFC_PJHI_AQBG_SMUC         ; Jason Voorhees, Firulais, Unknown; Game Over, Knorr, Rajoy, Bathory, lolo
 
 ; Stats
 set %ironCollected 0
@@ -424,7 +424,7 @@ set %_mineZ %3
 set %_mineTile %4
 set %_nodeTries 0
 _mine:
-findItem %minerKillersId
+findItem %minerKillerIds
 if ( %emergencyBankingActivated = #true && #findKind <> -1 )
 {
     set %mustBank #true
@@ -469,7 +469,7 @@ target
 event macro 22
 set %_mine #scnt + %miningTimeout
 _mineJournal:
-findItem %minerKillersId
+findItem %minerKillerIds
 if ( %emergencyBankingActivated = #true && #findKind <> -1 )
 {
     set %mustBank #true
