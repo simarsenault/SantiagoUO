@@ -2,6 +2,9 @@ set %containerId TOEAKMD
 set %craft Recall           ; Recall | Flamestrike
 set %recharge #false
 
+msg $,waitmenu 'Spell Circles' 'Fourth Circle'$
+msg $,cancelmenu$
+
 if ( %craft = Recall )
 {
     msg $,automenu 'Spell Circles' 'Fourth Circle'$
@@ -12,7 +15,7 @@ if ( %craft = Flamestrike )
     msg $,automenu 'Spell Circles' 'Seventh Circle'$
     msg $,automenu 'Spell Circle 7' 'Flamestrike'$
 }
-wait 20
+wait 80
 
 loop:
 findItem MMF C_ , #backPackId
