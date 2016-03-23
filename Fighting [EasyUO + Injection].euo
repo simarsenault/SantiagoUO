@@ -1,7 +1,8 @@
 set %containerId NHOAKMD
-set %wrestling #false
+set %wrestling #true
+set %spiritSpeakHeal #true
 set %weaponType VOH ; TSF = dagger (fencing) CNF = skinning knife (swordsmanship) VOH = club (macefighting)
-set %kickOutHits 50
+set %kickOutHits 30
 
 set %alligator UF
 set %grizzlyBear WF
@@ -18,11 +19,14 @@ set %shields GIK_NIK_CIK
 msg $,waitmenu 'What do you want to summon ?' 'Crocodile'$
 msg $,automenu 'What do you want to summon ?' 'Crocodile'$
 
-gosub openContainer %containerId
-findItem %bandages C_ , #backPackId
-if ( #findKind = -1 || #findStack < 15 )
-    gosub restockFromContainer %containerId %bandages 15
-    
+if ( %spiritSpeakHeal = #false )
+{
+    gosub openContainer %containerId
+    findItem %bandages C_ , #backPackId
+    if ( #findKind = -1 || #findStack < 15 )
+        gosub restockFromContainer %containerId %bandages 15
+}
+
 loop:
 gosub openContainer %containerId
 if ( %wrestling = #false )
@@ -43,9 +47,14 @@ if ( #findKind = -1 )
 findItem %mandrakeRoot C_ , #backPackId
 if ( #findKind = -1 )
     gosub restockFromContainer %containerId %mandrakeRoot 10
-gosub cleanBandages
-gosub heal
 event macro 6
+if ( %spiritSpeakHeal = #false )
+{
+    gosub cleanBandages
+    gosub healBandages
+}
+if ( %spiritSpeakHeal = #true )
+    gosub healSpiritSpeak
 gosub meditate
 gosub summon
 if ( %wrestling = #false )
@@ -95,13 +104,13 @@ exevent dropC #backpackId
 wait 10
 return #true
 
-sub heal
-_heal:
+sub healBandages
+_healBandages:
 while ( #hits < 100 )
 {
     findItem %bandages C_ , #backPackId
     if ( #findKind = -1 )
-        goto _heal
+        goto _healBandages
     set #lObjectId #findId
     event macro 17
     target 6s
@@ -123,6 +132,30 @@ while ( #hits < 100 )
     _bandagingDone:
 }
 return
+
+sub healSpiritSpeak
+_healSpiritSpeak:
+if ( #hits >= 100 )
+    return
+if ( #mana < 100 )
+    gosub meditate
+event macro 13 32
+set %_spiritSpeakTimeout #scnt + 5
+set %_spiritSpeakJournal #jIndex
+_spiritSpeak:
+if ( %_spiritSpeakTimeout < #scnt )
+    goto _healSpiritSpeak
+if ( %_spiritSpeakJournal > #jIndex )
+    goto _spiritSpeak
+scanJournal %_spiritSpeakJournal
+if ( you_fail_your_attempt_at_contacting in #journal )
+    goto _healSpiritSpeak
+if ( you_channel_your_own_spiritual in #journal )
+    goto _healSpiritSpeak
+if ( you_are_preoccupied_with_thoughts_of_battle in #journal )
+    event macro 6
+set %_spiritSpeakJournal %_spiritSpeakJournal + 1
+goto _spiritSpeak
 
 sub summon
 _summon:
