@@ -93,9 +93,6 @@ set %mineChanged #true
 set %currentMine 1
 set %start #scnt
 
-gosub updateStatisticsMenu
-halt
-
 msg $,waitmenu 'Tinkering' 'Tools'$ ; To debug ,automenu
 tile init
 
