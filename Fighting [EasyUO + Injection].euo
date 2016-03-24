@@ -141,7 +141,7 @@ if ( #mana < 100 )
     gosub meditate
 event macro 13 32
 set %_spiritSpeakTimeout #scnt + 5
-set %_spiritSpeakJournal #jIndex
+set %_spiritSpeakJournal #jIndex + 1
 _spiritSpeak:
 if ( %_spiritSpeakTimeout < #scnt )
     goto _healSpiritSpeak
