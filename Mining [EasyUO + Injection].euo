@@ -93,6 +93,9 @@ set %mineChanged #true
 set %currentMine 1
 set %start #scnt
 
+gosub updateStatisticsMenu
+halt
+
 msg $,waitmenu 'Tinkering' 'Tools'$ ; To debug ,automenu
 tile init
 
@@ -193,6 +196,7 @@ set %forgeZ #findZ
 return
 
 sub resetSpots
+set %lastAction resetSpots
 linesPerCycle 1000
 nameSpace local resetSpots
 nameSpace clear
@@ -298,6 +302,7 @@ return #false ; this case handle N/A
 
 ; gosub smartPathFind [x] [y] [z] [tolerance]
 sub smartPathFind
+set %lastAction smartPathFind
 linesPerCycle 1000
 set %_smartPathFindX %1
 set %_smartPathFindY %2
@@ -367,6 +372,7 @@ return #false ; Candidate is in reach, but farer to wanted destination
 
 ; gosub pathfind [x] [y] [z] [tolerance]
 sub pathfind
+set %lastAction pathfind
 set %_pathFindX %1
 set %_pathFindY %2
 set %_pathFindZ %3
@@ -418,6 +424,7 @@ if ( %_distX <= %_dist && %_distY <= %_dist )
 return #false
 
 sub mine
+set %lastAction mine
 set %_mineX %1
 set %_mineY %2
 set %_mineZ %3
@@ -506,6 +513,7 @@ sub smelt
 if ( %smelt1x1 = #true )
     gosub separateOres
 ignoreItem reset
+set %lastAction smelt
 _smelt:
 findItem %ores C_ , #backPackId
 if ( #findKind = -1 )
@@ -525,6 +533,7 @@ wait 5
 goto _smelt
 
 sub separateOres
+set %lastAction separateOres
 ignoreitem reset
 _seperateOres:
 finditem %oresStacks C_ , #backpackId
@@ -561,6 +570,7 @@ return #findStack
 
 ; gosub recall [rune]
 sub recall
+set %lastAction recall
 set %_recallRune %1
 if ( %_recallRune <= 8 ) ; First page
 {
@@ -625,6 +635,7 @@ event macro 17
 return
 
 sub dropIngotsOres
+set %lastAction dropIngotsOres
 ignoreItem reset
 _dropIngotsOres:
 findItem %oresIngots C_ , #backpackId
@@ -663,6 +674,7 @@ gosub dragDropContainer #findId #findStack %dropContainerId
 goto _dropIngotsOres
 
 sub dropTreasureBalls
+set %lastAction dropTreasureBalls
 ignoreItem reset
 _dropTreasureBalls:
 findItem %treasureBalls C_ , #backPackId
@@ -672,6 +684,7 @@ gosub dragDropContainer #findId 1 %dropContainerId
 goto _dropTreasureBalls
 
 sub dropEmptyBottles
+set %lastAction dropEmptyBottles
 ignoreItem reset
 _dropEmptyBottles:
 findItem %potion C_ , #backPackId
@@ -686,6 +699,7 @@ gosub dragDropContainer #findId #findStack %dropContainerId
 goto _dropEmptyBottles
 
 sub rechargeInvisibilityPotions
+set %lastAction rechargeInvisibilityPotions
 ignoreItem reset
 gosub openContainer %dropContainerId
 _rechargeInvisibilityPotions:
@@ -702,6 +716,7 @@ gosub dragDropContainer #findId 1 #backPackId
 return
 
 sub restockMiningTools
+set %lastAction restockMiningTools
 ignoreItem reset
 _restockMiningTools:
 findItem %miningTools C_ , #backPackId
@@ -746,6 +761,7 @@ if ( #findCol <> %_findItemContainerColor )
 return #true
 
 sub craftMiningTools
+set %lastAction craftMiningTools
 msg $,cancelmenu$
 ignoreItem reset
 findItem %tinkeringTools C_ , %dropContainerId
@@ -826,6 +842,7 @@ gosub dragDropContainer #findId 1 %dropContainerId 50 50
 goto _dropMiningTools
 
 sub rechargeRunebook
+set %lastAction rechargeRunebook
 ignoreItem reset
 gosub openContainer %dropContainerId
 _rechargeRunebook:
@@ -858,6 +875,7 @@ if ( #contId = %_containerId )
 goto _openContainer
 
 sub updateLastDeathValues
+set *miningLastDeathAction %lastAction
 gosub formatDateTime #date #time
 set *miningLastDeathDateTime #result
 ignoreItem reset
@@ -1064,7 +1082,10 @@ menu text lblPickaxes 300 110 Pickaxes:
 menu text lblRecallScrolls 10 130 Recall scrolls:
 menu text lblEstimatedNetProfit 300 130 Est. Net Profit:
 menu text lblRunTime 10 150 Run time:
+
+menu font size 10
 menu text lblLastDeathPlayersNear 500 70 Players' ID around:
+menu text lblLastDeathAction 500 90 Last action:
 menu text lblLastDeathJournal 500 110 Journal:
 
 menu text lblIron 10 190 Iron:
@@ -1126,7 +1147,8 @@ set %_totalIngotsOres %ironCollected + %stoneCollected + %copperCollected + %aga
 menu text lblTotalValue 430 270 %_totalIngotsOres
 
 menu font size 10
-menu text lblLastDeathPlayersNearValue 500 90 *miningLastDeathPlayerAround
+menu text lblLastDeathPlayersNearValue 625 70 *miningLastDeathPlayerAround
+menu text lblLastDeathActionValue 575 90 *miningLastDeathAction
 menu font size 7
 menu text lblLastDeathJournal0Value 500 130 *miningLastDeathJournal0
 menu text lblLastDeathJournal1Value 500 140 *miningLastDeathJournal1
