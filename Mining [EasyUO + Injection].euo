@@ -55,7 +55,7 @@ set %pathFindMineSpotTolerance 0
 set %pathFindForgeTolerance 1
 set %treasureBalls DMF
 set %humans IS_HS
-set %minerKillerIds XVZM_COOO_XZTF_VHFE_FJFC_PJHI_AQBG_SMUC         ; Jason Voorhees, Firulais, Unknown; Game Over, Knorr, Rajoy, Bathory, lolo
+set %minerKillerIds XVZM_COOO_XZTF_VHFE_FJFC_PJHI_AQBG_SMUC_GWZJ         ; Jason Voorhees, Firulais, Unknown; Game Over, Knorr, Rajoy, Bathory, lolo, TooFatNuts
 
 ; Stats
 set %ironCollected 0
@@ -512,6 +512,14 @@ if ( %smelt1x1 = #true )
 ignoreItem reset
 set %lastAction smelt
 _smelt:
+findItem %minerKillerIds
+if ( %emergencyBankingActivated = #true && #findKind <> -1 )
+{
+    set %mustBank #true
+    set %emergencyBanking #true
+
+    return
+}
 findItem %ores C_ , #backPackId
 if ( #findKind = -1 )
     return
@@ -533,6 +541,9 @@ sub separateOres
 set %lastAction separateOres
 ignoreitem reset
 _seperateOres:
+findItem %minerKillerIds
+if ( %emergencyBankingActivated = #true && #findKind <> -1 )
+    return
 finditem %oresStacks C_ , #backpackId
 if ( #findKind = -1 )
     return
@@ -541,6 +552,8 @@ gosub dragDropContainer #findId 1 #backPackId 80 80
 goto _seperateOres
 
 sub isBankingRequired
+if ( %mustBank = #true )
+    return #true
 if ( #weight >= %bankWeight )
     return #true
 gosub findContainerStack #backPackId %ironIngots 0
