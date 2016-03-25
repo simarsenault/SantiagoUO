@@ -1,0 +1,121 @@
+set %containerId HGQDKMD
+set %craftPotion Agility ; Agility
+
+set %potion WUF
+set %bloodmoss JUF
+
+msg $,waitmenu 'What sort of potion do you want' 'Agility'$
+msg $,cancelmenu$
+
+if ( %craftPotion = Agility )
+{
+    set %potionKegId KKHYJMD
+    set %potionColor 24
+    set %reagents 1
+    set %reagentType1 %bloodmoss
+    set %reagentAmount1 1
+    msg $,automenu 'What sort of potion do you want' 'Agility'$
+}
+
+wait 100
+
+loop:
+gosub addPotionToKeg
+gosub openContainer %containerId
+findItem %potion C_ , #backPackID
+if ( #findKind = -1 || #findCol <> 0 )
+    gosub grabEmptyBottle
+for %_reagent 1 %reagents
+{
+    set %_reagentType %reagentType . %_reagent
+    set %_reagentAmount %reagentAmount . %_reagent
+    set %_reagentToGrab %_reagentAmount * 100
+    findItem %_reagentType C_ , #backPackId
+    if ( #findKind = -1 || #findStack < %_reagentAmount )
+        gosub grabReagent %_reagentType %_reagentToGrab
+}
+gosub craft
+goto loop
+
+sub addPotionToKeg
+ignoreItem reset
+_addPotionToKeg:
+findItem %potion C_ , #backPackId
+if ( #findKind = -1 )
+    return
+if ( #findCol <> %potionColor )
+{
+    ignoreItem #findId
+    goto _addPotionToKeg
+}
+set #lObjectId %potionKegId
+set #lTargetId #findId
+set #ltargetKind 1
+event macro 17
+target 10s
+event macro 22
+wait 5
+return
+
+sub craft
+ignoreItem reset
+findItem %reagentType1 C_ , #backPackId
+if ( #findKind = -1 )
+    return
+set #lObjectId #findId
+event macro 17
+set %_journal #jIndex
+set %timeout #scnt + 10
+_journal:
+if ( %timeout < #scnt )
+    return
+if ( %_journal >= #jIndex )
+    goto _journal
+set %_journal %_journal + 1
+scanJournal %_journal
+if ( you_pour_the_completed_potion in #journal )
+    return
+if ( you_toss_the_failed_mixture in #journal )
+    return
+goto _journal
+
+sub grabEmptyBottle
+ignoreItem reset
+_grabEmptyBottle:
+findItem %potion C_ , %containerId
+if ( #findKind = -1 )
+    return
+if ( #findCol <> 0 )
+{
+    ignoreItem #findId
+    goto _grabEmptyBottle
+}
+exevent drag #findId 1
+exevent dropC #backPackId
+wait 10
+return
+
+sub grabReagent
+set %_grabReagentId %1
+set %_grabReagentAmount %2
+findItem %_grabReagentId C_ , %containerId
+if ( #findKind = -1 || #findStack < %_grabReagentAmount )
+    pause
+exevent drag #findId %_grabReagentAmount
+exevent dropC #backPackId
+wait 10
+return
+
+; gosub openContainer [containerId]
+sub openContainer
+set %_containerId %1
+_openContainer:
+set #lObjectId %_containerId
+event macro 17
+set %_timeout #scnt + 10
+_waitOpenContainer:
+if ( %_timeout < #scnt )
+    goto _openContainer
+if ( #contId = %_containerId )
+   return
+goto _openContainer
