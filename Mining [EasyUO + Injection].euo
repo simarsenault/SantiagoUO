@@ -1085,6 +1085,7 @@ menu text lblLastDeathPlayersNear 500 70 Players' ID around:
 menu text lblLastDeathAction 500 90 Last action:
 menu text lblLastDeathJournal 500 110 Journal:
 
+menu font size 12
 menu text lblIron 10 190 Iron:
 menu text lblStone 130 190 Stone:
 menu text lblCopper 250 190 Copper:
