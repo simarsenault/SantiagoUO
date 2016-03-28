@@ -1,8 +1,9 @@
 set %containerId HGQDKMD
-set %craftPotion Agility ; Agility
+set %craftPotion GreaterHeal ; Agility  | GreaterHeal
 
 set %potion WUF
 set %bloodmoss JUF
+set %ginseng JZF
 
 msg $,waitmenu 'What sort of potion do you want' 'Agility'$
 msg $,cancelmenu$
@@ -15,6 +16,15 @@ if ( %craftPotion = Agility )
     set %reagentType1 %bloodmoss
     set %reagentAmount1 1
     msg $,automenu 'What sort of potion do you want' 'Agility'$
+}
+if ( %craftPotion = GreaterHeal )
+{
+    set %potionKegId MNMYJMD
+    set %potionColor 52
+    set %reagents 1
+    set %reagentType1 %ginseng
+    set %reagentAmount1 7
+    msg $,automenu 'What sort of potion do you want' 'Greater Heal'$
 }
 
 wait 100
