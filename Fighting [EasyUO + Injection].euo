@@ -16,8 +16,8 @@ set %mandrakeRoot MZF
 set %bandages ZLF
 set %shields GIK_NIK_CIK
 
-msg $,waitmenu 'What do you want to summon ?' 'Crocodile'$
-msg $,automenu 'What do you want to summon ?' 'Crocodile'$
+msg $,waitmenu 'What do you want to summon ?' 'Grizzly Bear'$
+msg $,automenu 'What do you want to summon ?' 'Grizzly Bear'$
 
 if ( %spiritSpeakHeal = #false )
 {

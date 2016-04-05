@@ -1,5 +1,5 @@
 set %resourceBookId KLVZJMD
-set %containerId XWNAKMD
+set %containerId XWNAKMD ; BCCWJMD
 
 loop:
 findItem RMK_NMK_XMK_TMK_ZLK C_ , %containerId
@@ -10,7 +10,7 @@ if ( #findType = ZLK && #findCol <> 0 )
     ignoreItem #findId
     goto loop
 }
-exevent drag #findId 800
+exevent drag #findId 500
 exevent dropC #backPackId
 wait 10
 findItem RMK_NMK_XMK_TMK_ZLK C_ , #backPackId

@@ -1,5 +1,5 @@
 set %containerId HGQDKMD
-set %craftPotion GreaterHeal ; Agility  | GreaterHeal
+set %craftPotion Agility ; Agility  | GreaterHeal
 
 set %potion WUF
 set %bloodmoss JUF
