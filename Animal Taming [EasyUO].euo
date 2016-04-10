@@ -1,0 +1,42 @@
+set %animals WC
+
+loop:
+msg $all release$
+findItem %animals G_5
+if ( #findKind = -1 )
+{
+    ignoreItem reset
+    goto loop
+}
+set #lTargetId #findId
+set #lTargetKind 1
+event macro 13 35
+target
+event macro 22
+wait 40
+gosub tameJournal
+if ( #result = #true )
+    ignoreItem #findId
+goto loop
+
+sub tameJournal
+set %journal #jIndex + 1
+set %timeout #scnt + 60
+_tameJournal:
+if ( %timeout < #scnt )
+    return #false
+if ( %journal > #jIndex )
+    goto _tameJournal
+scanJournal %journal
+if ( you_fail_to_tame in #journal )
+    return #false
+if ( it_seems_to_accept in #journal )
+    return #true
+if ( is_already_tame in #journal )
+    return #true
+if ( you_are_already_the_master in #journal )
+    return #true
+if ( remembers_you_and_accepts in #journal )
+    return #true
+set %journal %journal + 1
+goto _tameJournal
