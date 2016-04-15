@@ -55,7 +55,7 @@ set %pathFindMineSpotTolerance 0
 set %pathFindForgeTolerance 1
 set %treasureBalls DMF
 set %humans IS_HS
-set %minerKillerIds XVZM_COOO_XZTF_VHFE_FJFC_PJHI_AQBG_SMUC_GWZJ_BIZO_LVJK_ZHMI_RNLH_NYCH_RJCN_SIR         ; Jason Voorhees, Firulais, Unknown; Game Over, Knorr, Rajoy, Bathory, lolo, TooFatNuts, Turmoil, Twinkii, Black Mamba, Spooky, IVORY, SaBu, Ciroc
+set %minerKillerIds XVZM_COOO_XZTF_VHFE_FJFC_PJHI_AQBG_SMUC_GWZJ_BIZO_LVJK_ZHMI_RNLH_NYCH_RJCN_SIR_TFCH_CQMD         ; Jason Voorhees, Firulais, Unknown; Game Over, Knorr, Rajoy, Bathory, lolo, TooFatNuts, Turmoil, Twinkii, Black Mamba, Spooky, IVORY, SaBu, Ciroc, Nike, ZerOCool
 
 ; Stats
 set %ironCollected 0
