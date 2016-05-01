@@ -21,7 +21,7 @@ goto loop
 
 sub tameJournal
 set %journal #jIndex + 1
-set %timeout #scnt + 60
+set %timeout #scnt + 10
 _tameJournal:
 if ( %timeout < #scnt )
     return #false

@@ -1,5 +1,5 @@
 set %resourceBookId KLVZJMD
-set %containerId XWNAKMD ; BCCWJMD
+set %containerId BCCWJMD ; XWNAKMD | BCCWJMD
 
 loop:
 findItem RMK_NMK_XMK_TMK_ZLK C_ , %containerId
